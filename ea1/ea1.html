@@ -27,15 +27,14 @@
         </header>
 
         <main class="d-flex flex-column gap-2">
-            <div class="m-3">
+            <div class="title-section">
                 <h1 class="display-5">Einsendeaufgabe 1</h1>
                 <p class="lead">
                     Interaktiv animierte Scheibe
                 </p>
-
             </div>
 
-            <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top mt-3" id="page-nav">
+            <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top" id="page-nav">
                 <div class="container-fluid">
                     <div class="navbar-nav">
                         <a class="nav-link" href="#part-1">Aufgabe</a>
@@ -44,11 +43,21 @@
                 </div>
             </nav>
 
-            <!--EXAMPLES-->
+            <!--AUFGABE-->
             <section id="part-1">
 
                 <h2 class="fw-light">Aufgabe</h2>
+                <img id="img" src="./frames/1.jpg" width="200" height="200">
+                <p id="frame-count"></p>
 
+                <div class="btn-group btn-group-lg" role="group" aria-label="Basic example">
+                    <button id="left-btn" type="button" class="btn btn-outline-primary">↩️
+                        <strong>L</strong>inksrotation</button>
+                    <button id="animation-btn" type="button" class="btn btn-primary">▶️ <strong>A</strong>nimation
+                        starten</button>
+                    <button id="right-btn" type="button" class="btn btn-outline-primary">↪️
+                        <strong>R</strong>echtsrotation</button>
+                </div>
             </section>
 
             <!--DOKUMENTATION-->
@@ -70,7 +79,7 @@
             <p class="text-body-secondary">Julia Heinzelmann</p>
             <p class="text-body-secondary">Berliner Hochschule für Technik </p>
             <p class="text-body-secondary"> <a
-                    href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Github Repository</a></p>
+                    href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Gitub Repository</a></p>
         </footer>
 
         <script src="./ea1.js"></script>

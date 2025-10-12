@@ -10,7 +10,7 @@ animationBtnE.addEventListener("click", toggleSpriteAnimation)
 nextBtn.addEventListener("click", increaseSpriteIndex)
 
 let currentSpriteIndex = 0;
-let maxSpriteIndex = 4
+let maxSpriteIndex = 7
 let doAnimateSprites = false;
 
 
@@ -40,7 +40,7 @@ function setSprite() {
     //Sprite 0 = 0px
     //Sprite 1 = -100px
     //Sprite 2 = -200px 
-    let backgroundPosition = currentSpriteIndex * -500;
+    let backgroundPosition = currentSpriteIndex * -100;
     spriteWindow.style.backgroundPosition = backgroundPosition + "px";
 }
 

@@ -46,8 +46,8 @@ footer>p {
 }
 
 #sprite-window {
-    width: 500px;
-    height: 500px;
+    width: 100px;
+    height: 100px;
     background-repeat: no-repeat;
 
     background-image: url(./ea1/frames/spritesheet.jpg);

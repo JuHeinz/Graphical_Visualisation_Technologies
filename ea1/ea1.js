@@ -1,5 +1,3 @@
-console.log("hello")
-
 let image = document.querySelector('#img');
 let frameCount = document.querySelector('#frame-count');
 let leftBtn = document.querySelector('#left-btn');
@@ -48,6 +46,22 @@ function increaseFrames() {
 }
 
 function startAnimation() {
+    console.log("StartAnimation")
 }
 
 function stopAnimation() { }
+
+addEventListener("keydown", (event) => {
+
+    if (event.code == "ArrowLeft" || event.code == "KeyL") {
+        decreaseFrames();
+    }
+
+    if (event.code == "ArrowRight" || event.code == "KeyR") {
+        increaseFrames();
+    }
+
+    if (event.code == "ArrowUp" || event.code == "KeyA") {
+        startAnimation();
+    }
+})

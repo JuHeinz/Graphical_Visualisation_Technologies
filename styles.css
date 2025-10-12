@@ -44,3 +44,13 @@ footer {
 footer>p {
     margin-bottom: 0;
 }
+
+#sprite-window {
+    width: 500px;
+    height: 500px;
+    background-repeat: no-repeat;
+
+    background-image: url(./ea1/frames/spritesheet.jpg);
+    background-position: 0;
+
+}

@@ -4,9 +4,13 @@ let leftBtn = document.querySelector('#left-btn');
 let animationBtn = document.querySelector('#animation-btn');
 let righttBtn = document.querySelector('#right-btn');
 
+const startAnimationText = "▶️ <strong>A</strong>nimation starten</button>"
+const stopAnimationText = "⏹️ <strong>A</strong>nimation stoppen</button>"
+let animationInterval = null;
+let doAnimate = false;
 
 leftBtn.addEventListener("click", decreaseFrames)
-animationBtn.addEventListener("click", startAnimation)
+animationBtn.addEventListener("click", toggleAnimation)
 righttBtn.addEventListener("click", increaseFrames)
 
 let currentFrame = 1;
@@ -45,11 +49,37 @@ function increaseFrames() {
     }
 }
 
-function startAnimation() {
-    console.log("StartAnimation")
+function toggleAnimation() {
+    doAnimate = !doAnimate;
+    if (doAnimate) {
+        console.log("Started Animation")
+        animationBtn.innerHTML = stopAnimationText;
+
+    } else {
+        console.log("Stopped Animation")
+        animationBtn.innerHTML = startAnimationText;
+    }
+
+    animate()
 }
 
-function stopAnimation() { }
+function animate() {
+
+    if (animationInterval) {
+        clearInterval(animationInterval); //cancel previous intervall
+    }
+
+
+    animationInterval = setInterval(() => {
+        if (!doAnimate) {
+            clearInterval(animationInterval) //cancel currently running intervall
+        } else {
+            increaseFrames()
+        }
+    }, 200);
+
+}
+
 
 addEventListener("keydown", (event) => {
 
@@ -62,6 +92,6 @@ addEventListener("keydown", (event) => {
     }
 
     if (event.code == "ArrowUp" || event.code == "KeyA") {
-        startAnimation();
+        toggleAnimation();
     }
 })

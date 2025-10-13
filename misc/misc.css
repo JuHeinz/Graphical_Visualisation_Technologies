@@ -1,4 +1,9 @@
-canvas {
+#canvas1,
+#canvas2 {
     width: 100vw;
-    height: 100vh;
+    height: 50vh;
+}
+
+body {
+    margin: 0;
 }

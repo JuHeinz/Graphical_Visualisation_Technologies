@@ -1,13 +1,16 @@
 /*  == ALLGEMEINES == */
-//Vertex = Eckpunkt/Node. Hat Attribute, z.B. eine Position aus X, Y und Z Koordinaten. Diese Koordinaten werden in einem dreidimensionalen Vektor (methematisches Konstrukt) gespeichert.
+//Vertex = Eckpunkt/Node. Hat Attribute, z.B. eine Position aus X, Y und Z Koordinaten.
+//Diese Koordinaten werden in einem Vektor (methematisches Konstrukt) gespeichert.
+// Hier werden 4 Vertices definiert, die jeweils eine X und eine Y-Koordinate haben. In diesem Fall ergeben ein Rechteck mit den Vertices (1,1) (-1,1), (1, -1), (-1,-1) nachdem wir unten definiert haben wie die Vertices zu verbinden sind.
+var vertices = new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]); //Die Geometrie ist ein Rechteck im Bereich (-1,-1) bis (+1,+1) in x- und y-Richtung, die z-Komponente ist 0. . 
 
 
 /* == RENDERING PIPELINE == */
 //Die Rendering Pipeline arbeitet zuerst mit Vertex-Kooridnaten und wendet darauf Vertex Shader an.
 //Dann transformiert sie die Vertices zu Raster-Pixelgrafik, die Fragments genannt wird. Darauf werden Fragment Shader angewendet.
 
-//SET UP
-const canvas = document.getElementById('canvas');
+/* == SET UP == */
+const canvas = document.getElementById('canvas1'); //DOM-Element auf dem gerendet wird.
 const gl = canvas.getContext('experimental-webgl'); //Schnittstelle zu WebGL. Auf dem gl Objekt wird alles aufgerufen.
 
 gl.clearColor(0, 1, 0, 1); //Setze Hintergrund Farbe der ganzen Canvas
@@ -29,8 +32,8 @@ Output des Shaders: neu berechnete Position (=transformierte x und y Koordinaten
 var vsSourceCode = 'attribute vec2 pos;' +
     'void main(){gl_Position = vec4(pos * 0.5, 0, 1); }'; //GLSL Code: Skaliere Geometrie auf halbe Größe.
 
-var vertexShader = gl.createShader(gl.VERTEX_SHADER); //Parameter gibt an ob es sich um einen Fragment- oder Vertex Shader handelt. 
-gl.shaderSource(vertexShader, vsSourceCode);
+var vertexShader = gl.createShader(gl.VERTEX_SHADER); //Istanziere den Shader. Parameter gibt an ob es sich um einen Fragment- oder Vertex Shader handelt. 
+gl.shaderSource(vertexShader, vsSourceCode); // Gib den Shader seinen Sourcecode
 gl.compileShader(vertexShader); // Shader zu Binary compilieren, so dass es im program verwendet werden kann
 
 /* == FRAGMENT SHADER ERSTELLEN UND KOMPILIEREN == */
@@ -40,6 +43,7 @@ gl.shaderSource(fragmentShader, fsSouceCode);
 gl.compileShader(fragmentShader);
 
 /* == PROGRAMM ERSTELLEN == */
+//Erstelle ein Programm, das auf dem GPU läuft
 var program = gl.createProgram(); //Programm besteht immer aus einem Vertex und einem Fragment Shader
 gl.attachShader(program, vertexShader);
 gl.attachShader(program, fragmentShader);
@@ -47,13 +51,13 @@ gl.linkProgram(program); //Das Programm-Objekt wird zu einem ausführbaren GPU-P
 gl.useProgram(program); //Ab jetzt wird alles mit den oben genannten Shadern gerendert
 
 /* == DATEN IN BUFFER LADEN == */
-var vertices = new Float32Array([1, 1, -1, 1, 1, -1, -1, -1]); //Die Geometrie ist ein Rechteck im Bereich (-1,-1) bis (+1,+1) in x- und y-Richtung, die z-Komponente ist 0. . 
 var vertexBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer); //alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.
-gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW); //dem Buffer die Vertex daten geben. Die Option STATIC_DRAW dient der Optimierung, sie zeigt an, dass die Daten nur einmal spezifiziert werden, also unverändert bleiben und in der Anwendung häufig genutzt werden.
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW); //dem Buffer die Vertex Daten geben. 
+// Die Option STATIC_DRAW dient der Optimierung, sie zeigt an, dass die Daten nur einmal spezifiziert werden, also unverändert bleiben und in der Anwendung häufig genutzt werden.
 
 /* == PROGRAMM MIT DATEN VERBINDEN == */
-var posAttrib = gl.getAttribLocation(program, 'pos'); //Das Attribut pos aus unserem geschriebenen Vertex Shader 
+var posAttrib = gl.getAttribLocation(program, 'pos'); //Das Attribut pos aus unserem geschriebenen Vertex Shader als js Variable
 gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0); // Mittels vertexAttribPointer wird das Datenformat für das Attribut pos über die Referenz posAttrib festgelegt und mit dem derzeit gebundenen buffer verknüpft
 
 //Definiere den Datentyp des Attributs: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
@@ -66,7 +70,7 @@ gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0); // Mittels vertexAt
     0 = Offset des ersten Attributes vom Anfang des Arrays
 */
 
-gl.enableVertexAttribArray(posAttrib);
+gl.enableVertexAttribArray(posAttrib); //Attribut aktivieren
 
 
 gl.clear(gl.COLOR_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.

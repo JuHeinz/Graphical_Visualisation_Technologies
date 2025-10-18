@@ -83,8 +83,18 @@ gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     4= Verarbeite 4 Vertices insgesamt
 */
 
-//gl.drawArrays(gl.LINE_LOOP, 0, 4); // Draws a straight line to the next vertex, and connects the last vertex back to the first.
-//gl.drawArrays(gl.TRIANGLES, 0, 4); //Draws a triangle for a group of three vertices.
+/* PRIMITVEN / MODES */
+/* 
+POINTS: 
+LINES: 
+LINE_STRIP
+LINE_LOOP
+TRIANGLES
+TRIANGLE_STRIP
+TRIANGLE_FAN
+
+*/
+
 
 
 /*

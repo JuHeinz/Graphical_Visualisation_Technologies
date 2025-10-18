@@ -1,7 +1,7 @@
-#canvas1,
-#canvas2 {
+canvas {
     width: 100vw;
-    height: 50vh;
+    height: 100vh;
+    border: 1px solid black;
 }
 
 body {

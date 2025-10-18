@@ -14,6 +14,12 @@
     margin-top: 1rem;
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: space-between;
+}
 
 
 section {
@@ -32,6 +38,8 @@ h2 {
 }
 
 footer {
+    width: 100vw;
+
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -45,6 +53,8 @@ footer>p {
     margin-bottom: 0;
 }
 
+
+/* EA1 */
 #sprite-window {
     width: 100px;
     height: 100px;

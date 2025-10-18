@@ -7,8 +7,33 @@ let canvas6 = document.getElementById('canvas6');
 let canvas7 = document.getElementById('canvas7');
 
 
+var vertices_points = new Float32Array([
+    -3, -3,
+    0, -3,
+    -3, 0,
+    0, 0,
+    -1.5, 3,
+]);
 
-var vertices = new Float32Array([
+var vertices_lines = new Float32Array([
+    -3, -3,
+    0, -3,
+    0, 0,
+    1, 1,
+]);
+
+var vertices_random = new Float32Array([
+    -5, -3,
+    0, -3,
+    -3, 2,
+    0, 2,
+    -1.1, 2,
+    -3, -1,
+    -3, -3,
+    0, 0,
+    0, -3]);
+
+var vertices_complex = new Float32Array([
     -3, -3,
     0, -3,
     -3, 0,
@@ -19,22 +44,20 @@ var vertices = new Float32Array([
     0, 0,
     0, -3]);
 
-
-
 main()
 
 function main() {
-    configure(canvas1, "points")
-    configure(canvas2, "lines")
-    configure(canvas3, "line_strip")
-    configure(canvas4, "line_loop")
-    configure(canvas5, "triangles")
-    configure(canvas6, "triangle_strip")
-    configure(canvas7, "triangle_fan")
+    configure(canvas1, "points", vertices_points)
+    configure(canvas2, "lines", vertices_lines)
+    configure(canvas3, "line_strip", vertices_random)
+    configure(canvas4, "line_loop", vertices_complex)
+    configure(canvas5, "triangles", vertices_complex)
+    configure(canvas6, "triangle_strip", vertices_complex)
+    configure(canvas7, "triangle_fan", vertices_complex)
 
 }
 
-function configure(canvas, modeString) {
+function configure(canvas, modeString, verticeArray) {
     let gl = canvas.getContext('experimental-webgl'); //Schnittstelle zu WebGL. Auf dem gl Objekt wird alles aufgerufen.
 
     let mode;
@@ -67,7 +90,7 @@ function configure(canvas, modeString) {
     }
 
     let program = createProgram(gl, 0.2, "0,0,0,1")
-    render(gl, mode, vertices, program);
+    render(gl, mode, verticeArray, program);
 }
 
 
@@ -122,10 +145,12 @@ function render(gl, mode, verticeArray, program) {
     /* == PROGRAMM MIT DATEN VERBINDEN == */
     var posAttrib = gl.getAttribLocation(program, 'pos');
     gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
+    // 2 = Die Dimensionen des Attributs (x und y)
+
     gl.enableVertexAttribArray(posAttrib);
 
     /* == RENDERN STARTEN == */
-    gl.drawArrays(mode, 0, vertices.length);
+    gl.drawArrays(mode, 0, verticeArray.length / 2);
 }
 
 

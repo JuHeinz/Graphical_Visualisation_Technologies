@@ -1,0 +1,22 @@
+canvas {
+    border: 1px solid black;
+    width: 300px;
+    height: 300px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+}
+
+@media (max-width: 1300px) {
+    .grid {
+        grid-template-columns: auto auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .grid {
+        grid-template-columns: auto;
+    }
+}

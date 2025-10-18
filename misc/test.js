@@ -1,37 +1,74 @@
-const canvas = document.getElementById('canvas'); //DOM-Element auf dem gerendet wird.
-const gl = canvas.getContext('experimental-webgl'); //Schnittstelle zu WebGL. Auf dem gl Objekt wird alles aufgerufen.
+let canvas1 = document.getElementById('canvas1'); //DOM-Element auf dem gerendet wird.
+let canvas2 = document.getElementById('canvas2');
+let canvas3 = document.getElementById('canvas3');
+let canvas4 = document.getElementById('canvas4');
+let canvas5 = document.getElementById('canvas5');
+let canvas6 = document.getElementById('canvas6');
+let canvas7 = document.getElementById('canvas7');
+
+
+
 var vertices = new Float32Array([
+    -3, -3,
+    0, -3,
+    -3, 0,
     0, 0,
-    3, 0,
-    0, 3,
-    3, 3,
-    1.5, 6,
-    0, 3,
+    -1.5, 3,
+    -3, -3,
+    -3, -3,
     0, 0,
-    3, 3,
-    3, 0]);
+    0, -3]);
+
+
 
 main()
 
 function main() {
-    gl.clearColor(0, 0, 0, 0); //Setze Hintergrund Farbe der ganzen Canvas
-    gl.clear(gl.COLOR_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.
-
-
-    let program1 = createProgram(0.1, "0,0,1,0")
-    render(gl.POINTS, vertices, program1);
-
-    let program2 = createProgram(0.2, "0,1,0,1")
-    render(gl.LINES, vertices, program2);
-
-    let program3 = createProgram(0.3, "1,0,0,1")
-    render(gl.LINE_STRIP, vertices, program3);
-
-    let program4 = createProgram(0.4, "1,0,1,1")
-    render(gl.TRIANGLES, vertices, program4);
+    configure(canvas1, "points")
+    configure(canvas2, "lines")
+    configure(canvas3, "line_strip")
+    configure(canvas4, "line_loop")
+    configure(canvas5, "triangles")
+    configure(canvas6, "triangle_strip")
+    configure(canvas7, "triangle_fan")
 
 }
 
+function configure(canvas, modeString) {
+    let gl = canvas.getContext('experimental-webgl'); //Schnittstelle zu WebGL. Auf dem gl Objekt wird alles aufgerufen.
+
+    let mode;
+    switch (modeString) {
+        case "points":
+            mode = gl.POINTS
+            break;
+
+        case "lines":
+            mode = gl.LINES
+            break;
+        case "line_strip":
+            mode = gl.LINE_STRIP
+            break;
+        case "line_loop":
+            mode = gl.LINE_LOOP
+            break;
+        case "triangles":
+            mode = gl.TRIANGLES
+            break;
+        case "triangle_strip":
+            mode = gl.TRIANGLE_STRIP
+            break;
+        case "triangle_fan":
+            mode = gl.TRIANGLE_FAN
+            break;
+
+        default:
+            break;
+    }
+
+    let program = createProgram(gl, 0.2, "0,0,0,1")
+    render(gl, mode, vertices, program);
+}
 
 
 function createFragmentShader(color) {
@@ -40,7 +77,7 @@ function createFragmentShader(color) {
 
 function createVertexShader(offset) {
 
-    var formula = "pos * 0.1 -" + offset
+    var formula = "pos * 0.3"
 
     return 'attribute vec2 pos;' +
         'void main(){ gl_Position = vec4(' + formula + ', 0, 1);' +
@@ -48,7 +85,10 @@ function createVertexShader(offset) {
 
 }
 
-function createProgram(offset, color) {
+function createProgram(gl, offset, color) {
+
+    gl.clearColor(0, 0, 0, 0); //Setze Hintergrund Farbe der ganzen Canvas
+    gl.clear(gl.COLOR_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.
 
     let vsCode = createVertexShader(offset)
     var fsCode = createFragmentShader(color)
@@ -73,10 +113,10 @@ function createProgram(offset, color) {
 }
 
 
-function render(mode, verticeArray, program) {
+function render(gl, mode, verticeArray, program) {
     /* == DATEN IN BUFFER LADEN == */
     var buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer); //alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.
     gl.bufferData(gl.ARRAY_BUFFER, verticeArray, gl.STATIC_DRAW);
 
     /* == PROGRAMM MIT DATEN VERBINDEN == */

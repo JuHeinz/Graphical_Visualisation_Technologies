@@ -1,9 +1,13 @@
 
-let vertices = parsePoints("27.865 31.83 17.615 26.209 7.462 32.009 9.553 20.362 0.99 12.335 12.532 10.758 17.394 0 22.436 10.672 34 12.047 25.574 20.22")
-let normalizedVertices = normalizeVertices(vertices, 40, 40)
-let indexes = createIndexArray(normalizeVertices);
-let vertices32 = new Float32Array(normalizedVertices)
-main(vertices32)
+let indexes = getIndexArray(normalizeVertices);
+//main(vertices32)
+
+function getVertices() {
+    let verticesFromPoints = parsePoints("27.865 31.83 17.615 26.209 7.462 32.009 9.553 20.362 0.99 12.335 12.532 10.758 17.394 0 22.436 10.672 34 12.047 25.574 20.22")
+    let normalizedVertices = normalizeVertices(verticesFromPoints, 40, 40)
+    return new Float32Array(normalizedVertices)
+}
+
 
 /**
  Split the point string from the SVG into an array of integers. These are the vertices.
@@ -31,8 +35,8 @@ function normalizeVertices(vertices, width, height) {
     return out;
 }
 
-function createIndexArray() {
-    const indexCount = vertices.length / 2;
+function getIndexArray(normalizedVertices) {
+    const indexCount = normalizedVertices.length / 2;
     const indexes = Array.from({ length: indexCount }, (_, i) => i)
     console.log(indexes)
     return indexes

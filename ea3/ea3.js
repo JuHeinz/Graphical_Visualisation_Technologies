@@ -8,11 +8,20 @@ let canvas7 = document.getElementById('canvas7');
 
 /// Vertex data.
 // Positions.
-var vertices = new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]);
+var vertices = new Float32Array([
+    0, 1, // 0
+    -1, -1, // 1
+    1, -1 // 2
+])
 // Colors as rgba.
-var colors = new Float32Array([1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1]);
+var colors = new Float32Array(
+    [
+        1, 0, 0, 1,  //r
+        0, 1, 0, 1,  //g
+        0, 0, 1, 1,  //b
+    ]);
 // Index data.
-var indices = new Uint16Array([0, 1, 2, 0, 2, 3])
+var indices = new Uint16Array([0, 1, 2])
 main()
 
 function main() {
@@ -114,8 +123,8 @@ function render(gl, mode, vertices, program) {
     /* == PROGRAMM/BUFFER MIT DATEN VERBINDEN == */
     //Das Attribut pos wird im Shader lokalisiert, initialisiert und gebunden.
     var posAttrib = gl.getAttribLocation(program, 'pos');
-    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
-    // 3 = Die Dimensionen des Attributs (x und y)
+    gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
+    // 2 = Die Dimensionen des Attributs (x und y)
     gl.enableVertexAttribArray(posAttrib);
 
 

@@ -6,25 +6,43 @@ let canvas5 = document.getElementById('canvas5');
 let canvas6 = document.getElementById('canvas6');
 let canvas7 = document.getElementById('canvas7');
 
+
+var triangle_top =
+    [   //top
+        0, 1,       //0
+        -0.5, 0,    //1
+        0.5, 0,     //2
+        //  Left
+        -0.5, 0,    //3
+        -1, -1,     //4
+        0, -1,      //5
+        // Right
+        0.5, 0,     //6
+        0, -1,       //7
+        1, -1       //8
+    ]
 /// Vertex data.
 // Positions.
-var vertices = new Float32Array([
-    0, 1, // 0
-    -1, -1, // 1
-    1, -1 // 2
-])
+var vertices = new Float32Array(triangle_top)
 // Colors as rgba.
 var colors = new Float32Array(
     [
-        1, 0, 0, 1,  //r
-        0, 1, 0, 1,  //g
-        0, 0, 1, 1,  //b
+        1, 0, 0, 1,  //0
+        0, 1, 0, 1,  //1
+        0, 0, 1, 1,  //2
+        0, 0, 0, 1,  //3
+        0, 0, 0, 1,  //4
+        0, 0, 0, 1,  //5
+        1, 0, 0, 1,  //6
+        0, 1, 0, 1,  //7
+        0, 0, 1, 1,  //8s
     ]);
 // Index data.
-var indices = new Uint16Array([0, 1, 2])
+var indices = new Uint16Array([0, 1, 2, 3, 4, 5, 6, 7, 8])
 main()
 
 function main() {
+    console.log(vertices)
     configure(canvas1, "points", vertices)
     configure(canvas2, "lines", vertices)
     configure(canvas3, "line_strip", vertices)
@@ -115,6 +133,7 @@ function createProgram(gl, vsSource, fsSource) {
  Buffer Set up und rendern starten
  */
 function render(gl, mode, vertices, program) {
+
     /* == VERTEX POSITION BUFFER == */
     var vboPos = gl.createBuffer(); //Vertex Position Buffer erstellen
     gl.bindBuffer(gl.ARRAY_BUFFER, vboPos); //alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.

@@ -21,19 +21,7 @@ var vertices = new Float32Array([
 // Index data "Haus des Nikolaus mit Tür"
 var indices = new Uint16Array([
     0, 1, 2, 0, 2, 8, 2, 7, 8, 2, 3, 7, 3, 6, 7, 3, 5, 6, 3, 4, 5]);
-
-// Colors as rgba. Für jeden Vertex eine Farbe. 
-var colors = new Float32Array
-    ([1, 0, 0, 1,
-        1, 0, 0, 1,
-        0, 0, 1, 1,
-        0, 0, 1, 1,
-        1, 0, 0, 1,
-        1, 0, 0, 1,
-        0, 0, 1, 1,
-        0, 0, 1, 1,
-        1, 0, 0, 1,
-    ]);
+main()
 
 main()
 
@@ -47,7 +35,7 @@ function main() {
     configure(canvas7, "triangle_fan", vertices)
 }
 
-function configure(canvas, modeString, verticeArray) {
+async function configure(canvas, modeString, verticeArray) {
     let gl = canvas.getContext('experimental-webgl'); //Schnittstelle zu WebGL. Auf dem gl Objekt wird alles aufgerufen.
 
     // Backface culling.
@@ -58,7 +46,11 @@ function configure(canvas, modeString, verticeArray) {
     //Setze Hintergrund Farbe der ganzen Canvas
     gl.clearColor(1, 1, 1, 1);
 
+    //Get programm from external files
+    const vsSource = await fetch('./vertex.vert').then(r => r.text());
+    const fsSource = await fetch('./fragment.frag').then(r => r.text());
 
+    let program = createProgram(gl, vsSource, fsSource)
 
     let mode;
     switch (modeString) {
@@ -88,7 +80,6 @@ function configure(canvas, modeString, verticeArray) {
             break;
     }
 
-    let program = createProgram(gl, "0,0,0,1")
     render(gl, mode, verticeArray, program);
 }
 
@@ -98,18 +89,16 @@ function configure(canvas, modeString, verticeArray) {
 /**
  Vertex Shader und Fragment Shader erstellen und zu einem Programm zusammenführen.
  */
-function createProgram(gl, color) {
+function createProgram(gl, vsSource, fsSource) {
 
     /* == VERTEX SHADER ERSTELLEN UND KOMPILIEREN == */
-    let vsCode = createVertexShader()
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vertexShader, vsCode);
+    gl.shaderSource(vertexShader, vsSource);
     gl.compileShader(vertexShader);
 
     /* == FRAGMENT SHADER ERSTELLEN UND KOMPILIEREN == */
-    var fsCode = createFragmentShader(color)
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragmentShader, fsCode);
+    gl.shaderSource(fragmentShader, fsSource);
     gl.compileShader(fragmentShader);
 
     /* == PROGRAMM ERSTELLEN == */
@@ -122,25 +111,6 @@ function createProgram(gl, color) {
     return program
 }
 
-function createFragmentShader(color) {
-    return 'precision mediump float;' +
-        'varying vec4 color;' +
-        'void main() {' +
-        'gl_FragColor = color;' +
-        '}';
-}
-
-function createVertexShader() {
-    return '' +
-        'attribute vec3 pos;' +
-        'attribute vec4 col;' +
-        'varying vec4 color;' +
-        'void main(){' +
-        'color = col;' +
-        'gl_Position = vec4(0.2*pos-0.5, 1);' +
-        '}';
-
-}
 
 
 /**
@@ -156,8 +126,8 @@ function render(gl, mode, vertices, program) {
     /* == PROGRAMM/BUFFER MIT DATEN VERBINDEN == */
     //Das Attribut pos wird im Shader lokalisiert, initialisiert und gebunden.
     var posAttrib = gl.getAttribLocation(program, 'pos');
-    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
-    // 3 = Die Dimensionen des Attributs (x und y)
+    gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
+    // 2 = Die Dimensionen des Attributs (x und y)
     gl.enableVertexAttribArray(posAttrib);
 
 

@@ -1,22 +1,5 @@
 canvas {
     border: 1px solid black;
-    width: 200px;
-    height: 200px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: auto auto auto auto;
-}
-
-@media (max-width: 1300px) {
-    .grid {
-        grid-template-columns: auto auto;
-    }
-}
-
-@media (max-width: 700px) {
-    .grid {
-        grid-template-columns: auto;
-    }
+    width: 500px;
+    height: 500px;
 }

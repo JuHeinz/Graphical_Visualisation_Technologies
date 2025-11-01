@@ -1,10 +1,4 @@
 let canvas1 = document.getElementById('canvas1'); //DOM-Element auf dem gerendet wird.
-let canvas2 = document.getElementById('canvas2');
-let canvas3 = document.getElementById('canvas3');
-let canvas4 = document.getElementById('canvas4');
-let canvas5 = document.getElementById('canvas5');
-let canvas6 = document.getElementById('canvas6');
-let canvas7 = document.getElementById('canvas7');
 
 
 var triangle_top =
@@ -18,7 +12,7 @@ var triangle_top =
         0, -1,      //5
         // Right
         0.5, 0,     //6
-        0, -1,       //7
+        0, -1,      //7
         1, -1       //8
     ]
 /// Vertex data.
@@ -27,15 +21,15 @@ var vertices = new Float32Array(triangle_top)
 // Colors as rgba.
 var colors = new Float32Array(
     [
-        1, 0, 0, 1,  //0
-        0, 1, 0, 1,  //1
-        0, 0, 1, 1,  //2
-        0, 0, 0, 1,  //3
-        0, 0, 0, 1,  //4
-        0, 0, 0, 1,  //5
-        1, 0, 0, 1,  //6
-        0, 1, 0, 1,  //7
-        0, 0, 1, 1,  //8s
+        1, 0, 0, 1,  //0 Rot
+        1, 1, 1, 1,  //1 Weiß
+        1, 1, 1, 1,  //2 Weiß
+        1, 1, 1, 1,  //3 Weiß
+        0, 1, 0, 1,  //4 Grün
+        1, 1, 1, 1,  //5 Weiß
+        1, 1, 1, 1,  //6 Weiß
+        1, 1, 1, 1,  //7 Weiß
+        0, 0, 1, 1,  //8 Blau
     ]);
 // Index data.
 var indices = new Uint16Array([0, 1, 2, 3, 4, 5, 6, 7, 8])
@@ -43,13 +37,8 @@ main()
 
 function main() {
     console.log(vertices)
-    configure(canvas1, "points", vertices)
-    configure(canvas2, "lines", vertices)
-    configure(canvas3, "line_strip", vertices)
-    configure(canvas4, "line_loop", vertices)
-    configure(canvas5, "triangles", vertices)
-    configure(canvas6, "triangle_strip", vertices)
-    configure(canvas7, "triangle_fan", vertices)
+    configure(canvas1, "triangles", vertices)
+
 }
 
 async function configure(canvas, modeString, verticeArray) {

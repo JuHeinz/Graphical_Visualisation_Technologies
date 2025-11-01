@@ -2,59 +2,37 @@ let canvas1 = document.getElementById('canvas1'); //DOM-Element auf dem gerendet
 let canvas2 = document.getElementById('canvas2');
 let canvas3 = document.getElementById('canvas3');
 let canvas4 = document.getElementById('canvas4');
-let canvas5 = document.getElementById('canvas5');
-let canvas6 = document.getElementById('canvas6');
-let canvas7 = document.getElementById('canvas7');
 
-
-var vertices_points = new Float32Array([
-    -3, -3,
-    0, -3,
-    -3, 0,
-    0, 0,
-    -1.5, 3,
-]);
-
-var vertices_lines = new Float32Array([
-    -3, -3,
-    0, -3,
-    0, 0,
-    1, 1,
-]);
-
-var vertices_random = new Float32Array([
-    -5, -3,
-    0, -3,
-    -3, 2,
-    0, 2,
-    -1.1, 2,
-    -3, -1,
-    -3, -3,
-    0, 0,
-    0, -3]);
-
-var vertices_complex = new Float32Array([
-    -3, -3,
-    0, -3,
-    -3, 0,
-    0, 0,
-    -1.5, 3,
-    -3, -3,
-    -3, -3,
-    0, 0,
-    0, -3]);
+// Vertex data.
+var vertices = new Float32Array([
+    0, 0, 2, 0, 2, 2, 3, 2, 3, 0, 5, 0, 5, 5, 2.5, 7, 0, 5]);
+// Index data.
+var indices = new Uint16Array([
+    0, 1, 2, 0, 2, 8, 2, 7, 8, 2, 3, 7, 3, 6, 7, 3, 5, 6, 3, 4, 5]);
 
 main()
+/* Create num pairs of random x and y coordinates */
+function createRandomVertices(num, min, max) {
+
+    let vertices = [];
+
+    for (let index = 0; index < num; index++) {
+        let x = Math.random() * (max - min) + min
+        let y = Math.random() * (max - min) + min
+        vertices.push(x.toFixed(1))
+        vertices.push(y.toFixed(1))
+    }
+
+    console.log(vertices)
+    return new Float32Array(vertices)
+}
+
 
 function main() {
-    configure(canvas1, "points", vertices_points)
-    configure(canvas2, "lines", vertices_lines)
-    configure(canvas3, "line_strip", vertices_random)
-    configure(canvas4, "line_loop", vertices_complex)
-    configure(canvas5, "triangles", vertices_complex)
-    configure(canvas6, "triangle_strip", vertices_complex)
-    configure(canvas7, "triangle_fan", vertices_complex)
-
+    configure(canvas1, "points", vertices)
+    configure(canvas2, "lines", vertices)
+    configure(canvas3, "line_strip", vertices)
+    configure(canvas4, "line_loop", vertices)
 }
 
 function configure(canvas, modeString, verticeArray) {
@@ -89,7 +67,7 @@ function configure(canvas, modeString, verticeArray) {
             break;
     }
 
-    let program = createProgram(gl, 0.2, "0,0,0,1")
+    let program = createProgram(gl, "0.15, 0.71, 0.123, 1")
     render(gl, mode, verticeArray, program);
 }
 
@@ -98,22 +76,18 @@ function createFragmentShader(color) {
     return 'void main() { gl_FragColor = vec4(' + color + '); }'
 }
 
-function createVertexShader(offset) {
-
-    var formula = "pos * 0.3"
-
+function createVertexShader() {
     return 'attribute vec2 pos;' +
-        'void main(){ gl_Position = vec4(' + formula + ', 0, 1);' +
-        'gl_PointSize = 10.0; }';
+        'void main(){ gl_Position = vec4(pos*0.2-0.5, 0, 1); }';
 
 }
 
-function createProgram(gl, offset, color) {
+function createProgram(gl, color) {
 
-    gl.clearColor(0, 0, 0, 0); //Setze Hintergrund Farbe der ganzen Canvas
+    gl.clearColor(1, 1, 1, 1); //Setze Hintergrund Farbe der ganzen Canvas
     gl.clear(gl.COLOR_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.
 
-    let vsCode = createVertexShader(offset)
+    let vsCode = createVertexShader()
     var fsCode = createFragmentShader(color)
 
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -150,7 +124,7 @@ function render(gl, mode, verticeArray, program) {
     gl.enableVertexAttribArray(posAttrib);
 
     /* == RENDERN STARTEN == */
-    gl.drawArrays(mode, 0, verticeArray.length / 2);
+    gl.drawArrays(mode, 0, 30);
 }
 
 

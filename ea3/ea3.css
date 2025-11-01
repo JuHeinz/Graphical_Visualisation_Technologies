@@ -4,10 +4,6 @@ canvas {
     height: 300px;
 }
 
-body {
-    margin: 0;
-}
-
 .grid {
     display: grid;
     grid-template-columns: auto auto auto auto;

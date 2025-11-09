@@ -1,0 +1,162 @@
+<!DOCTYPE html5>
+<html>
+
+    <body>
+        <canvas id="canvas" width="200" height="200"></canvas>
+        <script>
+            // Get the WebGL context.
+            var canvas = document.getElementById('canvas');
+            var gl = canvas.getContext('experimental-webgl');
+
+            // Pipeline setup.
+            gl.clearColor(1, 1, 1, 1);
+            // Backface culling.
+            gl.frontFace(gl.CCW);
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.BACK);
+            //gl.cullFace(gl.FRONT);		
+
+            // Compile vertex shader.
+            var vsSource = '' +
+                'attribute vec3 pos;' +
+                'attribute vec4 col;' +
+                'varying vec4 color;' +
+                'void main(){' +
+                'color = col;' +
+                'gl_Position = vec4(pos*0.35-0.9, 1);' +
+                '}';
+            var vs = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vs, vsSource);
+            gl.compileShader(vs);
+
+            // Compile fragment shader.
+            fsSouce = 'precision mediump float;' +
+                'varying vec4 color;' +
+                'void main() {' +
+                'gl_FragColor = color;' +
+                '}';
+
+            var fs = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fs, fsSouce);
+            gl.compileShader(fs);
+
+            // Link shader together into a program.
+            var prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            // Vertex data.
+            // Positions. 5x6 Vertices mit 3 Positions-Werten (x,y,z) 
+            var vertices = new Float32Array(3 * 5 * 6);
+            // Colors as rgba. 5x6 Vertices mit einer Farbe aus 4 Werten (r,g,b,a).
+            var colors = new Float32Array(4 * 5 * 6);
+            // Index data. Two triangles per grid cell. 4x5 Zellen mit jeweils zwei Dreiecken und für jedes Dreieck werden 3 Indices benötigt
+            var indices = new Uint16Array(3 * 2 * 4 * 5);
+
+            var z = 0;
+
+            // Loop 5x6 grid.
+            // Set vertex positions and colors.
+            for (var x = 0; x < 5; x++) {
+                for (var y = 0; y < 6; y++) {
+                    // Set vertex positions.
+                    //Der Vertex-Index läuft von unten-links (x=0, y=0, vertexIndex=0) nach oben rechts (x=4, y=5, vertexIndex=5*5+4=29).
+                    var vertexIndex = y * 5 + x;
+                    vertices[vertexIndex * 3] = x;
+                    vertices[vertexIndex * 3 + 1] = y;
+                    vertices[vertexIndex * 3 + 2] = z;
+
+
+
+                    // Set vertex colors.
+                    // Use blue as default.
+                    currentColor = [0, 0, 1, 1];
+
+                    // Set house border color.
+                    if ((x > 0 && x < 4) && (y > 0 && y < 5)) {
+                        currentColor = [0, 1, 0, 1]; //grün
+                    }
+                    // Set house center color.
+                    if (x == 2 && (y == 2 || y == 3)) {
+                        currentColor = [1, 0, 1, 1]; //magenta
+                    }
+                    // Set corrections. // Für Hausdach
+                    if (y == 4 && (x == 1 || x == 3)) {
+                        currentColor = [0, 0, 1, 1];
+                    }
+                    // Loop rgba.                
+                    for (var i = 0; i < 4; i++) {
+                        colors[vertexIndex * 4 + i] = currentColor[i];
+                    };
+
+                    // Set index.
+                    // Jede Zelle wird in Bezug auf den unteren linken Vertex bearbeitet. 
+                    // Der triangleIndex gibt den Offset im indices Array an:
+                    // 3 Werte pro Dreieck, 8 Dreiecke pro Zeile und 2 Dreiecke pro Zelle (in angefangenen Zeilen).
+                    //Set triangles right of current vertex.
+                    if (x > 3) {
+                        continue;
+                    }
+                    var triangleIndex = 3 * (y * 8 + x * 2);
+                    // Triangle corners in grid cell rel. to cur. vert.
+                    //  In der Variablen TrisCornerVertexIndexDiff werden die Eckpunkte der beiden Dreiecke einer Zelle in Bezug auf den aktuellen vertexIndex gespeichert. 
+                    if (x < 2) {
+                        TrisCornerVertexIndexDiff = [0, 1, 6, 0, 6, 5];
+                    } else {
+                        TrisCornerVertexIndexDiff = [0, 1, 5, 1, 6, 5];
+                    }
+                    // Loop corners.
+                    for (var i = 0; i < 6; i++) {
+                        indices[triangleIndex + i] = vertexIndex +
+                            TrisCornerVertexIndexDiff[i];
+                    };
+
+                }
+            }
+
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+
+            gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            // Setup color vertex buffer object.
+            var vboCol = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+            gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+            gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(colAttrib);
+
+            // Setup index buffer object.
+            var ibo = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+            ibo.numerOfEmements = indices.length;
+
+            // Clear framebuffer and render primitives.
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawElements(gl.TRIANGLES, ibo.numerOfEmements, gl.UNSIGNED_SHORT, 0);
+
+
+            // Vertex data.
+            //        7
+            //       /\
+            //      /  \
+            // 	   8_____6
+            //     | 2_3 |
+            //     0_| |_5
+            //       1 4
+            //		
+        </script>
+    </body>
+
+</html>

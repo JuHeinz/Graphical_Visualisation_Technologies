@@ -113,8 +113,6 @@ function render(gl, mode, vertices, program) {
     // 3 = Die Dimensionen des Attributs (x,y,z)
     gl.enableVertexAttribArray(posAttrib);
 
-
-
     // Setup constant color.
     var colAttrib = gl.getAttribLocation(program, 'col');
     gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);

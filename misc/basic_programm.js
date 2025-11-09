@@ -21,8 +21,19 @@ var vertices = new Float32Array([
 // Index data "Haus des Nikolaus mit Tür"
 var indices = new Uint16Array([
     0, 1, 2, 0, 2, 8, 2, 7, 8, 2, 3, 7, 3, 6, 7, 3, 5, 6, 3, 4, 5]);
-main()
 
+var colors = new Float32Array(
+    [
+        1, 0, 0, 1,  //0 Rot
+        0, 0, 0, 0,  //1
+        0, 0, 0, 0,  //2 
+        0, 0, 0, 0,  //3 
+        0, 0, 0, 0, ,  //4 
+        0, 0, 0, 0, ,  //5 
+        0, 0, 0, 0,  //6 
+        0, 0, 0, 0,  //7 
+        0, 0, 1, 1,  //8 Blau
+    ]);
 main()
 
 function main() {

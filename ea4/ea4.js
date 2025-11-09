@@ -3,6 +3,7 @@ let canvas1 = document.getElementById('canvas1'); //DOM-Element auf dem gerendet
 
 var vertices;
 var indices;
+var colors;
 
 
 main()
@@ -113,12 +114,8 @@ function render(gl, mode, vertices, program) {
     // 3 = Die Dimensionen des Attributs (x,y,z)
     gl.enableVertexAttribArray(posAttrib);
 
-    // Setup constant color.
-    var colAttrib = gl.getAttribLocation(program, 'col');
-    gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
 
-
-    /* == COLOR BUFFER == 
+    /* == COLOR BUFFER == */
     var vboCol = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
     gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
@@ -126,7 +123,7 @@ function render(gl, mode, vertices, program) {
     var colAttrib = gl.getAttribLocation(program, 'col');
     gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0); // 4 Dimensionen -> RGBA
     gl.enableVertexAttribArray(colAttrib);
-    */
+
 
     /* == INDEX BUFFER == */
     /* Der Index Buffer muss der letzte Buffer sein, der an gl gebunden ist, bevor gl.drawElements aufgerufen wird! */
@@ -143,11 +140,17 @@ function render(gl, mode, vertices, program) {
 
 
 function createVertexData() {
-    var n = 32
+    var n = 32 //Anzahl vertices.
+
     // Positions.
-    vertices = new Float32Array(3 * (n + 1));
+    vertices = new Float32Array(3 * (n + 1)); //3, weil die X, Y und Z Position jeweils hinterineander geschrieben wird. 
+
+    //colors
+    colors = new Float32Array(4 * (n));
+
     // Index data for Linestip.
     indices = new Uint16Array(n + 1);
+
 
     var dt = 2 * Math.PI / n; //dt = Schrittweite. 
     var t = 0;
@@ -159,11 +162,22 @@ function createVertexData() {
         var y = r * Math.sin(t);
 
         // Set vertex positions.
-        vertices[i * 3] = x;
-        vertices[i * 3 + 1] = y;
-        vertices[i * 3 + 2] = z;
+        vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+        vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+        vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
 
         // Set index.
         indices[i] = i;
+
+        //set color
+        //Es muss so viele Farben geben, wie es Vertices gibt. 
+        colors[i * 4] = Math.random()// R
+        colors[i * 4 + 1] = Math.random() // G
+        colors[i * 4 + 2] = Math.random() // B
+        colors[i * 4 + 3] = 1 // A
     }
+
+    console.dir(colors)
+
 }
+

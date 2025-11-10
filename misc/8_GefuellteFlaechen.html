@@ -46,8 +46,8 @@
             gl.useProgram(prog);
 
             // Vertex data.
-            // Positions, index data.
-            var vertices, indices;
+            // Positions, Index data.
+            var vertices, indicesLines, indicesTris;
             // Fill the data arrays.
             createVertexData();
 
@@ -58,42 +58,61 @@
                 vertices, gl.STATIC_DRAW);
             // Bind vertex buffer to attribute variable.
             var posAttrib = gl.getAttribLocation(prog, 'pos');
-            gl.vertexAttribPointer(posAttrib, 3,
-                gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT,
+                false, 0, 0);
             gl.enableVertexAttribArray(posAttrib);
 
             // Setup constant color.
             var colAttrib = gl.getAttribLocation(prog, 'col');
-            gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
 
-            // Setup index buffer object.
-            var ibo = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-                indices, gl.STATIC_DRAW);
-            ibo.numberOfElements = indices.length;
+            // Setup lines index buffer object.
+            var iboLines = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines, gl.STATIC_DRAW);
+            iboLines.numberOfElements = indicesLines.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup tris index buffer object.
+            var iboTris = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris, gl.STATIC_DRAW);
+            iboTris.numberOfElements = indicesTris.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
             // Clear framebuffer and render primitives.
             gl.clear(gl.COLOR_BUFFER_BIT);
+
+            // Setup rendering tris.
+            gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.drawElements(gl.TRIANGLES,
+                iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+            // Setup rendering lines.
+            gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
             gl.drawElements(gl.LINES,
-                ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+
 
             function createVertexData() {
                 var n = 32;
                 var m = 5;
                 // Positions.
                 vertices = new Float32Array(3 * (n + 1) * (m + 1));
-                // Index data for Linestrip.
-                indices = new Uint16Array(2 * 2 * n * m);
+                // Index data.
+                indicesLines = new Uint16Array(2 * 2 * n * m);
+                indicesTris = new Uint16Array(3 * 2 * n * m);
 
                 var dt = 2 * Math.PI / n;
                 var dr = 1 / m;
                 // Counter for entries in index array.
-                var iIndex = 0;
+                var iLines = 0;
+                var iTris = 0;
 
                 // Loop angle t.
                 for (var i = 0, t = 0; i <= n; i++, t += dt) {
-
                     // Loop radius r.
                     for (var j = 0, r = 0; j <= m; j++, r += dr) {
 
@@ -111,20 +130,29 @@
                         // Set index.
                         // Line on beam.
                         if (j > 0 && i > 0) {
-                            indices[iIndex++] = iVertex - 1;
-                            indices[iIndex++] = iVertex;
+                            indicesLines[iLines++] = iVertex - 1;
+                            indicesLines[iLines++] = iVertex;
                         }
-
                         // Line on ring.
                         if (j > 0 && i > 0) {
-                            indices[iIndex++] = iVertex - (m + 1);
-                            indices[iIndex++] = iVertex;
+                            indicesLines[iLines++] = iVertex - (m + 1);
+                            indicesLines[iLines++] = iVertex;
+                        }
+
+                        // Set index.
+                        // Two Triangles.
+                        if (j > 0 && i > 0) {
+                            indicesTris[iTris++] = iVertex;
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m + 1);
+                            //        
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m + 1) - 1;
+                            indicesTris[iTris++] = iVertex - (m + 1);
                         }
                     }
                 }
-
-            }
-
+            }    
         </script>
     </body>
 

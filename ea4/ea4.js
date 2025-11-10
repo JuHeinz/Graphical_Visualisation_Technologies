@@ -1,12 +1,16 @@
 
 // Get the WebGL context.
 var canvas1 = document.getElementById('canvas1');
-var [vertexArray1, indexArray1] = createVertexDataWeb(3, 3);
+var [vertexArray1, indexArray1] = createVertexDataPillow(10, 10);
 var canvas2 = document.getElementById('canvas2');
-var [vertexArray2, indexArray2] = createVertexDataWeb(6, 6);
+var [vertexArray2, indexArray2] = createVertexDataHorn(10, 5);
 var canvas3 = document.getElementById('canvas3');
-var [vertexArray3, indexArray3] = createVertexDataOwn(8, 5);
+var [vertexArray3, indexArray3] = createVertexDataOwn(29, 3);
 
+// scale vertex arrays to range [-1, +1]
+vertexArray1 = scaleVertices(vertexArray1);
+vertexArray2 = scaleVertices(vertexArray2);
+vertexArray3 = scaleVertices(vertexArray3);
 
 setup(canvas1, vertexArray1, indexArray1)
 setup(canvas2, vertexArray2, indexArray2)
@@ -139,32 +143,32 @@ function createVertexDataWeb(number_beams, number_circles) {
     return [vertices, indices]
 }
 
-function createVertexDataOwn(beams, circles) {
-    var n_num_beam = beams;
-    var m_num_Circ = circles;
+function createVertexDataPillow(vert, hor) {
+    var horizLines = vert;
+    var vert_lines = hor;
     // Positions.
-    vertices = new Float32Array(3 * (n_num_beam + 1) * (m_num_Circ + 1));
-    // Index data for
-    indices = new Uint16Array(2 * 2 * n_num_beam * m_num_Circ);
+    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
+    // Index data
+    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
 
-    var dt = 2 * Math.PI / n_num_beam; //Schrittweite für Winkel t. Kreisumfang geteilt durch Anzahl der Strahlen.
-    var dr = 1 / m_num_Circ; //Schrittweite für Radius r. 
+    var du = Math.PI / horizLines; //Schrittweite auf horizontaler Ebene  (u: [0, +pi])
+    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
 
     // Counter for entries in index array.
     var curIndexInIBO = 0;
 
-    // Loop Winkel t. Bei jedem Durchgang wird ein Schritt auf dem Umfang gegangen. 
-    for (var i_currentBeam = 0, t = 0; i_currentBeam <= n_num_beam; i_currentBeam++, t += dt) {
+    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
+    for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
 
         // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
-        for (var j_currentCirc = 0, r = 0; j_currentCirc <= m_num_Circ; j_currentCirc++, r += dr) {
+        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
 
             //Counter für die Vertice, die wir gerade berechnen. 
-            var curVertice = i_currentBeam * (m_num_Circ + 1) + j_currentCirc; // If curBeam = 2 and curCircle = 3, then curIndexInVBO = 2 * 4 + 3 = 11. 
-            var x = Math.sin(t) * Math.cos(r); // X-Wert an Stelle t berechnen
-            var y = Math.cos(t); // Y-Wert an Stelle t berechnen
-            //var z = Math.sin(t) * Math.sin(r);
-            var z = 1
+            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
+            var x = Math.cos(u); // X-Wert an Stelle u berechnen
+            var z = Math.cos(v); // Y-Wert an Stelle v berechnen
+            var y = 0.5 * Math.sin(u) * Math.sin(v)
+
             //VERTEX ARRAY
             // X, Y und Z für aktuellen Vertex speichern.
             vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
@@ -175,30 +179,244 @@ function createVertexDataOwn(beams, circles) {
 
             // INDEX ARRAY
 
-            /* Line on Beam.
-             Linie zwischen der aktuellen Vertice, zu der auf dem Ring vor ihr mit dem gleichen Winkel. 
+            /* Abschnitt auf Horizontale
+             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
             */
-            if (j_currentCirc > 0 && i_currentBeam > 0) {
-                var prevVertOnBeam = curVertice - 1;
-                indices[curIndexInIBO++] = prevVertOnBeam;
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevOnHorizontal = curVertice - 1;
+                indices[curIndexInIBO++] = prevOnHorizontal;
 
                 indices[curIndexInIBO++] = curVertice;
+                console.log(prevOnHorizontal + "->" + curVertice)
+
             }
 
-            /* Line on ring. 
-                Linie zwischen  der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+            /* Abschnitt auf Vertikale
+                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
             */
-            if (j_currentCirc > 0 && i_currentBeam > 0) {
-                var prevVertOnRing = curVertice - (m_num_Circ + 1);
-                indices[curIndexInIBO++] = prevVertOnRing // Vertex ein Schritt auf dem Ring weiter
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevVertOnVertical = curVertice - (vert_lines + 1);
+                indices[curIndexInIBO++] = prevVertOnVertical
                 indices[curIndexInIBO++] = curVertice;
+                console.log(prevVertOnVertical + "->" + curVertice)
+
             }
         }
     }
     return [vertices, indices]
 }
 
+function createVertexDataHorn(vert, hor) {
+    var horizLines = vert;
+    var vert_lines = hor;
+    // Positions.
+    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
+    // Index data
+    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
 
+    var du = 1 / horizLines; //Schrittweite auf horizontaler Ebene  (u: [0, +pi])
+    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
+
+    // Counter for entries in index array.
+    var curIndexInIBO = 0;
+
+    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
+    for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
+
+        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
+            //Counter für die Vertice, die wir gerade berechnen. 
+            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
+            var x = (1 + u * Math.cos(v)) * Math.sin(Math.PI * u);
+            var y = (1 + u * Math.cos(v)) * Math.cos(Math.PI * u) + u;
+            var z = u * Math.sin(v)
+
+            //VERTEX ARRAY
+            // X, Y und Z für aktuellen Vertex speichern.
+            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
+            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
+            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+            console.log("_____")
+            console.log("#", curVertice, "|(" + x + "|" + y + ")")
+
+            // INDEX ARRAY
+
+            /* Abschnitt auf Horizontale
+             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevOnHorizontal = curVertice - 1;
+                indices[curIndexInIBO++] = prevOnHorizontal;
+
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevOnHorizontal + "->" + curVertice)
+
+            }
+
+            /* Abschnitt auf Vertikale
+                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevVertOnVertical = curVertice - (vert_lines + 1);
+                indices[curIndexInIBO++] = prevVertOnVertical
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevVertOnVertical + "->" + curVertice)
+
+            }
+        }
+    }
+    return [vertices, indices]
+}
+
+function createVertexDataOwn(vert, hor) {
+    var horizLines = vert;
+    var vert_lines = hor;
+    // Positions.
+    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
+    // Index data
+    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
+
+    var du = (2 * Math.PI) / horizLines; //Schrittweite auf horizontaler Ebene  (u: [-pi +pi])
+    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
+
+    // Counter for entries in index array.
+    var curIndexInIBO = 0;
+
+    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
+    for (var curHorizontal = 0, u = Math.PI / 17; curHorizontal <= horizLines; curHorizontal++, u += du) {
+
+        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
+            //Counter für die Vertice, die wir gerade berechnen. 
+            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
+            var x = Math.cos(u);
+            var y = Math.cos(v);
+            var z = Math.sin(v);
+
+            //VERTEX ARRAY
+            // X, Y und Z für aktuellen Vertex speichern.
+            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
+            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
+            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+            console.log("_____")
+            console.log("#", curVertice, "|(" + x + "|" + y + ")")
+
+            // INDEX ARRAY
+
+            /* Abschnitt auf Horizontale
+             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevOnHorizontal = curVertice - 1;
+                indices[curIndexInIBO++] = prevOnHorizontal;
+
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevOnHorizontal + "->" + curVertice)
+
+            }
+
+            /* Abschnitt auf Vertikale
+                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevVertOnVertical = curVertice - (vert_lines + 1);
+                indices[curIndexInIBO++] = prevVertOnVertical
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevVertOnVertical + "->" + curVertice)
+
+            }
+        }
+    }
+    return [vertices, indices]
+}
+function createVertexDataGrid(vert, hor) {
+    var horizLines = vert;
+    var vert_lines = hor;
+    // Positions.
+    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
+    // Index data
+    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
+
+    var du = 1 / horizLines; //Schrittweite auf horizontaler Ebene
+    var dv = 1 / vert_lines; //Schrittweite auf vertikaler Ebene
+
+    // Counter for entries in index array.
+    var curIndexInIBO = 0;
+
+    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
+    for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
+
+        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
+
+            //Counter für die Vertice, die wir gerade berechnen. 
+            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
+            var x = v; // X-Wert an Stelle t berechnen
+            var y = u; // Y-Wert an Stelle t berechnen
+            var z = 1
+
+            //VERTEX ARRAY
+            // X, Y und Z für aktuellen Vertex speichern.
+            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
+            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
+            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+            console.log("_____")
+            console.log("#", curVertice, "|(" + x + "|" + y + ")")
+
+            // INDEX ARRAY
+
+            /* Abschnitt auf Horizontale
+             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevOnHorizontal = curVertice - 1;
+                indices[curIndexInIBO++] = prevOnHorizontal;
+
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevOnHorizontal + "->" + curVertice)
+
+            }
+
+            /* Abschnitt auf Vertikale
+                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+            */
+            if (curVertical > 0 && curHorizontal > 0) {
+                var prevVertOnVertical = curVertice - (vert_lines + 1);
+                indices[curIndexInIBO++] = prevVertOnVertical
+                indices[curIndexInIBO++] = curVertice;
+                console.log(prevVertOnVertical + "->" + curVertice)
+
+            }
+        }
+    }
+    return [vertices, indices]
+}
+
+/**
+ * Vertices auf skalieren, damit sie in -1 bis +1 passen.
+ */
+function scaleVertices(vertices) {
+    if (!vertices || vertices.length === 0) return vertices;
+    // vertices kann Float32Array oder reguläres Array sein
+    const src = (vertices instanceof Float32Array) ? vertices : new Float32Array(vertices);
+
+    // Bestimme das maximale absolute Element (über alle x,y,z)
+    let maxAbs = 0.0;
+    for (let i = 0; i < src.length; i++) {
+        const a = Math.abs(src[i]);
+        if (a > maxAbs) maxAbs = a;
+    }
+
+    // Wenn alle Werte 0 sind, nichts tun
+    if (maxAbs === 0) return new Float32Array(src);
+
+    const inv = 1.0 / maxAbs;
+    const dst = new Float32Array(src.length);
+    for (let i = 0; i < src.length; i++) {
+        dst[i] = src[i] * inv;
+    }
+    return dst;
+}
 
 
 

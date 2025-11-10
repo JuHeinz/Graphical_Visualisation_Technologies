@@ -1,77 +1,84 @@
 
 // Get the WebGL context.
-var canvas = document.getElementById('canvas1');
-var gl = canvas.getContext('experimental-webgl');
+var canvas1 = document.getElementById('canvas1');
+var [vertexArray1, indexArray1] = createVertexDataWeb(3, 3);
+var canvas2 = document.getElementById('canvas2');
+var [vertexArray2, indexArray2] = createVertexDataWeb(6, 6);
+var canvas3 = document.getElementById('canvas3');
+var [vertexArray3, indexArray3] = createVertexDataOwn(8, 5);
 
-// Pipeline setup.
-gl.clearColor(.95, .95, .95, 1);
-// Backface culling.
-gl.frontFace(gl.CCW);
-gl.enable(gl.CULL_FACE);
-gl.cullFace(gl.BACK);
 
-// Compile vertex shader. 
-var vsSource = '' +
-    'attribute vec3 pos;' +
-    'attribute vec4 col;' +
-    'varying vec4 color;' +
-    'void main(){' + 'color = col;' +
-    'gl_Position = vec4(pos, 1);' +
-    '}';
-var vs = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vs, vsSource);
-gl.compileShader(vs);
+setup(canvas1, vertexArray1, indexArray1)
+setup(canvas2, vertexArray2, indexArray2)
+setup(canvas3, vertexArray3, indexArray3)
 
-// Compile fragment shader.
-fsSouce = 'precision mediump float;' +
-    'varying vec4 color;' +
-    'void main() {' +
-    'gl_FragColor = color;' +
-    '}';
-var fs = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fs, fsSouce);
-gl.compileShader(fs);
+function setup(canvas, vertexArray, indexArray) {
 
-// Link shader together into a program.
-var prog = gl.createProgram();
-gl.attachShader(prog, vs);
-gl.attachShader(prog, fs);
-gl.bindAttribLocation(prog, 0, "pos");
-gl.linkProgram(prog);
-gl.useProgram(prog);
+    var gl = canvas.getContext('experimental-webgl');
 
-// Vertex data.
-// Positions, index data.
-var vertices, indices;
-// Fill the data arrays.
-createVertexDataWeb();
+    // Pipeline setup.
+    gl.clearColor(.95, .95, .95, 1);
+    // Backface culling.
+    gl.frontFace(gl.CCW);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
 
-// Setup position vertex buffer object.
-var vboPos = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
-gl.bufferData(gl.ARRAY_BUFFER,
-    vertices, gl.STATIC_DRAW);
-// Bind vertex buffer to attribute variable.
-var posAttrib = gl.getAttribLocation(prog, 'pos');
-gl.vertexAttribPointer(posAttrib, 3,
-    gl.FLOAT, false, 0, 0);
-gl.enableVertexAttribArray(posAttrib);
+    // Compile vertex shader. 
+    var vsSource = '' +
+        'attribute vec3 pos;' +
+        'attribute vec4 col;' +
+        'varying vec4 color;' +
+        'void main(){' + 'color = col;' +
+        'gl_Position = vec4(pos, 1);' +
+        '}';
+    var vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, vsSource);
+    gl.compileShader(vs);
 
-// Setup constant color.
-var colAttrib = gl.getAttribLocation(prog, 'col');
-gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+    // Compile fragment shader.
+    fsSouce = 'precision mediump float;' +
+        'varying vec4 color;' +
+        'void main() {' +
+        'gl_FragColor = color;' +
+        '}';
+    var fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, fsSouce);
+    gl.compileShader(fs);
 
-// Setup index buffer object.
-var ibo = gl.createBuffer();
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-    indices, gl.STATIC_DRAW);
-ibo.numberOfElements = indices.length;
+    // Link shader together into a program.
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.bindAttribLocation(prog, 0, "pos");
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
 
-// Clear framebuffer and render primitives.
-gl.clear(gl.COLOR_BUFFER_BIT);
-gl.drawElements(gl.LINES,
-    ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+    // Setup position vertex buffer object.
+    var vboPos = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexArray, gl.STATIC_DRAW);
+
+    // Bind vertex buffer to attribute variable.
+    var posAttrib = gl.getAttribLocation(prog, 'pos');
+    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(posAttrib);
+
+    // Setup constant color.
+    var colAttrib = gl.getAttribLocation(prog, 'col');
+    gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+
+    // Setup index buffer object.
+    var ibo = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexArray, gl.STATIC_DRAW);
+    ibo.numberOfElements = indexArray.length;
+
+    // Clear framebuffer and render primitives.
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawElements(gl.LINES, ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+}
+
 
 /**
  * Spinnennetz. Es gibt nicht mehr ein t, sondern zwei Parameter: u,v. Hier abgegbildet durch r und t.
@@ -83,9 +90,9 @@ gl.drawElements(gl.LINES,
  * Jeder Strahl hat einen eigenen Winkel (= Punkt auf dem Umfang) t.
  * 
 */
-function createVertexDataWeb() {
-    var n_num_beam = 3; //Anzahl der Punkte auf dem Radius -> Anzahl der Strahlen
-    var m_num_Circ = 3; //Anzahl der Kreise
+function createVertexDataWeb(number_beams, number_circles) {
+    var n_num_beam = number_beams; //Anzahl der Punkte auf dem Radius -> Anzahl der Strahlen
+    var m_num_Circ = number_circles; //Anzahl der Kreise
     // Positions.
     vertices = new Float32Array(3 * (n_num_beam + 1) * (m_num_Circ + 1));
     // Index data for
@@ -129,8 +136,68 @@ function createVertexDataWeb() {
             }
         }
     }
-
+    return [vertices, indices]
 }
+
+function createVertexDataOwn(beams, circles) {
+    var n_num_beam = beams;
+    var m_num_Circ = circles;
+    // Positions.
+    vertices = new Float32Array(3 * (n_num_beam + 1) * (m_num_Circ + 1));
+    // Index data for
+    indices = new Uint16Array(2 * 2 * n_num_beam * m_num_Circ);
+
+    var dt = 2 * Math.PI / n_num_beam; //Schrittweite für Winkel t. Kreisumfang geteilt durch Anzahl der Strahlen.
+    var dr = 1 / m_num_Circ; //Schrittweite für Radius r. 
+
+    // Counter for entries in index array.
+    var curIndexInIBO = 0;
+
+    // Loop Winkel t. Bei jedem Durchgang wird ein Schritt auf dem Umfang gegangen. 
+    for (var i_currentBeam = 0, t = 0; i_currentBeam <= n_num_beam; i_currentBeam++, t += dt) {
+
+        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+        for (var j_currentCirc = 0, r = 0; j_currentCirc <= m_num_Circ; j_currentCirc++, r += dr) {
+
+            //Counter für die Vertice, die wir gerade berechnen. 
+            var curVertice = i_currentBeam * (m_num_Circ + 1) + j_currentCirc; // If curBeam = 2 and curCircle = 3, then curIndexInVBO = 2 * 4 + 3 = 11. 
+            var x = Math.sin(t) * Math.cos(r); // X-Wert an Stelle t berechnen
+            var y = Math.cos(t); // Y-Wert an Stelle t berechnen
+            //var z = Math.sin(t) * Math.sin(r);
+            var z = 1
+            //VERTEX ARRAY
+            // X, Y und Z für aktuellen Vertex speichern.
+            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
+            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
+            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+            console.log("_____")
+            console.log("#", curVertice, "|(" + x + "|" + y + ")")
+
+            // INDEX ARRAY
+
+            /* Line on Beam.
+             Linie zwischen der aktuellen Vertice, zu der auf dem Ring vor ihr mit dem gleichen Winkel. 
+            */
+            if (j_currentCirc > 0 && i_currentBeam > 0) {
+                var prevVertOnBeam = curVertice - 1;
+                indices[curIndexInIBO++] = prevVertOnBeam;
+
+                indices[curIndexInIBO++] = curVertice;
+            }
+
+            /* Line on ring. 
+                Linie zwischen  der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+            */
+            if (j_currentCirc > 0 && i_currentBeam > 0) {
+                var prevVertOnRing = curVertice - (m_num_Circ + 1);
+                indices[curIndexInIBO++] = prevVertOnRing // Vertex ein Schritt auf dem Ring weiter
+                indices[curIndexInIBO++] = curVertice;
+            }
+        }
+    }
+    return [vertices, indices]
+}
+
 
 
 

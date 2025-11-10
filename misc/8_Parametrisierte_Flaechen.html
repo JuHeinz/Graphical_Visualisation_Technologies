@@ -49,7 +49,7 @@
             // Positions, index data.
             var vertices, indices;
             // Fill the data arrays.
-            createVertexDataWeb();
+            createVertexDataOwn();
 
             // Setup position vertex buffer object.
             var vboPos = gl.createBuffer();
@@ -109,11 +109,81 @@
                     for (var j_currentCirc = 0, r = 0; j_currentCirc <= m_num_Circ; j_currentCirc++, r += dr) {
 
                         //Counter für die Vertice, die wir gerade berechnen. 
+                        console.log("_____")
+                        console.log("Beam:" + i_currentBeam + " Circle:" + j_currentCirc)
                         var curVertice = i_currentBeam * (m_num_Circ + 1) + j_currentCirc; // If curBeam = 2 and curCircle = 3, then curIndexInVBO = 2 * 4 + 3 = 11. 
                         var x = r * Math.cos(t);
                         var y = r * Math.sin(t);
                         var z = 0;
 
+                        //VERTEX ARRAY
+                        // X, Y und Z für aktuellen Vertex speichern.
+                        vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
+                        vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
+                        vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+
+                        console.log("#", curVertice, "|(" + x + "|" + y + ")")
+
+                        // INDEX ARRAY
+
+                        /* Line on Beam.
+                         Linie zwischen der aktuellen Vertice, zu der auf dem Ring vor ihr mit dem gleichen Winkel. 
+                        */
+                        if (j_currentCirc > 0 && i_currentBeam > 0) {
+                            var prevVertOnBeam = curVertice - 1;
+                            console.log("On Beam: " + prevVertOnBeam + " -> " + curVertice)
+
+                            indices[curIndexInIBO++] = prevVertOnBeam;
+                            indices[curIndexInIBO++] = curVertice;
+                        }
+
+                        /* Line on ring. 
+                            Linie zwischen  der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+                        */
+                        if (j_currentCirc > 0 && i_currentBeam > 0) {
+
+                            var prevVertOnRing = curVertice - (m_num_Circ + 1);
+                            console.log("On Ring: " + prevVertOnRing + " -> " + curVertice)
+
+                            indices[curIndexInIBO++] = prevVertOnRing // Vertex ein Schritt auf dem Ring weiter
+                            indices[curIndexInIBO++] = curVertice;
+                        }
+                    }
+                }
+                console.log(indices)
+                console.log(vertices)
+            }
+
+            /**
+             * 
+             * 
+            */
+            function createVertexDataOwn() {
+                var n_num_beam = 30; //Anzahl der Punkte auf dem Radius -> Anzahl der Strahlen
+                var m_num_Circ = 30; //Anzahl der Kreise
+                // Positions.
+                vertices = new Float32Array(3 * (n_num_beam + 1) * (m_num_Circ + 1));
+                // Index data for
+                indices = new Uint16Array(2 * 2 * n_num_beam * m_num_Circ);
+
+                var dt = 2 * Math.PI / n_num_beam; //Schrittweite für Winkel t. Kreisumfang geteilt durch Anzahl der Strahlen.
+                var dr = 1 / m_num_Circ; //Schrittweite für Radius r. 
+
+                // Counter for entries in index array.
+                var curIndexInIBO = 0;
+
+                // Loop Winkel t. Bei jedem Durchgang wird ein Schritt auf dem Umfang gegangen. 
+                for (var i_currentBeam = 0, t = 0; i_currentBeam <= n_num_beam; i_currentBeam++, t += dt) {
+
+                    // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+                    for (var j_currentCirc = 0, r = 0; j_currentCirc <= m_num_Circ; j_currentCirc++, r += dr) {
+
+                        //Counter für die Vertice, die wir gerade berechnen. 
+                        var curVertice = i_currentBeam * (m_num_Circ + 1) + j_currentCirc; // If curBeam = 2 and curCircle = 3, then curIndexInVBO = 2 * 4 + 3 = 11. 
+                        var x = Math.sin(t) * Math.cos(r); // X-Wert an Stelle t berechnen
+                        var y = Math.cos(t); // Y-Wert an Stelle t berechnen
+                        //var z = Math.sin(t) * Math.sin(r);
+                        var z = 1
                         //VERTEX ARRAY
                         // X, Y und Z für aktuellen Vertex speichern.
                         vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
@@ -125,7 +195,7 @@
                         // INDEX ARRAY
 
                         /* Line on Beam.
-                         Linie von der aktuellen Vertice, zu der auf dem Ring vor ihr mit dem gleichen Winkel. 
+                         Linie zwischen der aktuellen Vertice, zu der auf dem Ring vor ihr mit dem gleichen Winkel. 
                         */
                         if (j_currentCirc > 0 && i_currentBeam > 0) {
                             var prevVertOnBeam = curVertice - 1;
@@ -135,7 +205,7 @@
                         }
 
                         /* Line on ring. 
-                            Linie von der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+                            Linie zwischen  der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
                         */
                         if (j_currentCirc > 0 && i_currentBeam > 0) {
                             var prevVertOnRing = curVertice - (m_num_Circ + 1);
@@ -147,7 +217,6 @@
                 console.log(indices)
                 console.log(vertices)
             }
-
 
             /**
            * Wie Spinnennetz, nur mit Ausbeulung in y-Richtung.

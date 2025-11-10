@@ -45,9 +45,9 @@ var canvas2 = document.getElementById('canvas2');
 var canvas3 = document.getElementById('canvas3');
 
 // Arrays berechnen
-var [vertexArray1, indexArray1, triArray1] = createVertexData(10, 10, x_Pillow, y_Pillow, z_Pillow, Math.PI, (2 * Math.PI));
-var [vertexArray2, indexArray2, triArray2] = createVertexData(10, 5, x_Horn, y_Horn, z_Horn, 1, (2 * Math.PI));
-var [vertexArray3, indexArray3, triArray3] = createVertexData(40, 2, x_Own, y_Own, z_Own, (2 * Math.PI), (2 * Math.PI));
+var [vertexArray1, indexArray1, triArray1, colors1] = createVertexData(10, 10, x_Pillow, y_Pillow, z_Pillow, Math.PI, (2 * Math.PI));
+var [vertexArray2, indexArray2, triArray2, colors2] = createVertexData(10, 5, x_Horn, y_Horn, z_Horn, 1, (2 * Math.PI));
+var [vertexArray3, indexArray3, triArray3, colors3] = createVertexData(40, 2, x_Own, y_Own, z_Own, (2 * Math.PI), (2 * Math.PI));
 
 // scale vertex arrays to range [-1, +1]
 vertexArray1 = scaleVertices(vertexArray1);
@@ -55,11 +55,11 @@ vertexArray2 = scaleVertices(vertexArray2);
 vertexArray3 = scaleVertices(vertexArray3);
 
 
-setup(canvas1, vertexArray1, indexArray1, triArray1,)
-setup(canvas2, vertexArray2, indexArray2, triArray2)
-setup(canvas3, vertexArray3, indexArray3, triArray3)
+setup(canvas1, vertexArray1, indexArray1, triArray1, colors1)
+setup(canvas2, vertexArray2, indexArray2, triArray2, colors2)
+setup(canvas3, vertexArray3, indexArray3, triArray3, colors3)
 
-function setup(canvas, vertexArray, indexArray, triArray) {
+function setup(canvas, vertexArray, indexArray, triArray, colors) {
     var gl = canvas.getContext('experimental-webgl');
 
     // Pipeline setup.
@@ -112,7 +112,7 @@ function setup(canvas, vertexArray, indexArray, triArray) {
 
     // Setup constant color.
     var colAttrib = gl.getAttribLocation(prog, 'col');
-    gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1);
 
     // Setup index buffer object for lines
     var iboLines = gl.createBuffer();
@@ -131,17 +131,26 @@ function setup(canvas, vertexArray, indexArray, triArray) {
     // Clear framebuffer and render primitives.
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    /* == COLOR BUFFER == */
+    var vboCol = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    // Bind buffer to attribute variable.
+    var colAttrib = gl.getAttribLocation(prog, 'col');
+    gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(colAttrib);
+
+
     // Setup rendering tris.
-    gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1);
+    //gl.vertexAttrib4f(colAttrib, 1, 1, 1, 1); //Füllfarbe
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
     gl.drawElements(gl.TRIANGLES,
         iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
     // Setup rendering lines.
-    gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1); //Linienfarbe
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
-    gl.drawElements(gl.LINES,
-        iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINES, iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 }
 
 
@@ -154,6 +163,7 @@ function createVertexData(vert, hor, x_func, y_func, z_func, wertebereich_u, wer
     indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
     indicesTris = new Uint16Array(3 * 2 * horizLines * vert_lines);
 
+    var colors = new Float32Array(4 * (horizLines + 1) * (vert_lines + 1));
 
     var du = wertebereich_u / horizLines; //Schrittweite auf horizontaler Ebene  
     var dv = wertebereich_v / vert_lines; //Schrittweite auf vertikaler Ebene 
@@ -218,9 +228,15 @@ function createVertexData(vert, hor, x_func, y_func, z_func, wertebereich_u, wer
                 indicesTris[curIndexInTriIBO++] = curVertice - (vert_lines + 1) - 1;
                 indicesTris[curIndexInTriIBO++] = curVertice - (vert_lines + 1);
             }
+
+            //Zufällige Farbe für currentVertice festlegen
+            colors[curVertice * 4] = Math.random()
+            colors[curVertice * 4 + 1] = Math.random()
+            colors[curVertice * 4 + 2] = Math.random()
+            colors[curVertice * 4 + 3] = 1
         }
     }
-    return [vertices, indices, indicesTris]
+    return [vertices, indices, indicesTris, colors]
 }
 
 /**

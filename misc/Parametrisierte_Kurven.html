@@ -1,0 +1,266 @@
+<!DOCTYPE html5>
+<html>
+
+    <body>
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <script>
+            // Get the WebGL context.
+            var canvas = document.getElementById('canvas');
+            var gl = canvas.getContext('experimental-webgl');
+
+            // Pipeline setup.
+            gl.clearColor(.95, .95, .95, 1);
+            // Backface culling.
+            gl.frontFace(gl.CCW);
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.BACK);
+
+            // Compile vertex shader. 
+            var vsSource = '' +
+                'attribute vec3 pos;' +
+                'attribute vec4 col;' +
+                'varying vec4 color;' +
+                'void main(){' + 'color = col;' +
+                'gl_Position = vec4(pos, 1);' +
+                '}';
+            var vs = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vs, vsSource);
+            gl.compileShader(vs);
+
+            // Compile fragment shader.
+            fsSouce = 'precision mediump float;' +
+                'varying vec4 color;' +
+                'void main() {' +
+                'gl_FragColor = color;' +
+                '}';
+            var fs = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fs, fsSouce);
+            gl.compileShader(fs);
+
+            // Link shader together into a program.
+            var prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.bindAttribLocation(prog, 0, "pos");
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            // Vertex data.
+            // Positions, index data.
+            var vertices, indices;
+            // Fill the data arrays.
+            createVertexDataHelix();
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER,
+                vertices, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 3,
+                gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            // Setup constant color.
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+            gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+
+            // Setup index buffer object.
+            var ibo = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+                indices, gl.STATIC_DRAW);
+            ibo.numberOfElements = indices.length;
+
+            // Clear framebuffer and render primitives.
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawElements(gl.LINE_STRIP,
+                ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+
+            /**
+             * Parametrisierte Form eines Liniensegments =
+             *  x = x_0 + t* v_x
+             *  y = y_0 + t * v_y
+             * 
+             * (x_0, y_0) -> Anfangspunkt 
+             * V_x, V_y -> Distanz zwischen Anfangs- und Endpunkt
+             * */
+            function createVertexDataLine() {
+                var n = 4
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                //geradengleichung = 
+                var beginX = -0.2 //X_0
+                var beginY = 0.1 //Y_0
+
+                var endX = 0.5 // X_Ende Beliebiger Endpunkt
+                var endY = 0.2 // Y_Ende
+
+                //Richtungsvektor = Liniensegment berechnen. Distanz zwischen Anfang- und Endpunkt
+                var V_x = endX - beginX
+                var V_y = endY - beginY
+
+                var dt = V_x / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+
+                var z = 0;
+                for (var i = 0; i <= n; i++, t += dt) {
+                    //t = Ein Punkt auf der Linie. 
+                    console.log(t)
+                    var x = beginX + t * V_x; // X-Wert an Stelle t berechnen
+                    var y = beginY + t * V_y; // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+
+            }
+
+
+            /**
+             * Kreis
+             * Ein Punkt auf einem Kreis an Stelle t lässt sich berechnen durch x = r * cos(t) und y= r * sin(t).
+             * */
+            function createVertexDataCircle() {
+                var n = 32
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. 
+                var dt = circle_Umfang / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var r = 1.0;
+
+                var z = 0;
+                for (var i = 0; i <= n; i++, t += dt) {
+                    //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+                    var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+                    var y = r * Math.sin(t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+            /**
+             * Spirale
+             * Hier hängt der Radius von t ab. 
+             * 
+             * */
+            function createVertexDataSpiral() {
+                var n = 32
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var dt = 2 * Math.PI / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var z = 0;
+                var r = 1;
+
+
+                for (var i = 0; i <= n; i++, t += dt) {
+                    r = 1 - t / (2 * Math.PI) //Radius hängt davon ab, an welchem Punkt wir uns befinden. 
+
+                    var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+                    var y = r * Math.sin(t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+
+            /**
+             *  Spirale mit drei Windungen 
+             * */
+            function createVertexDataSpiral3() {
+                var m = 32 //Anzahl Vertices pro Windung
+                var n = m * 3; //Es gibt drei Windungen, also müssen 3 * 32 Vertices erzeugt werden.
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var dt = 2 * Math.PI / m; //dt = Schrittweite. Da die Spirale drei Windungen haben soll, muss pro Windung ein Drittel der Gesamt-Vertices berechnet werden. (m ist 1/3 von n)
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+
+                var z = 0;
+                var r = 1;
+
+                for (var i = 0; i <= n; i++, t += dt) {
+                    r = 1 - i / n //Radius hängt davon ab, an welchem Punkt wir uns befinden. 
+                    var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+                    var y = r * Math.sin(t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+            /**
+            *  Spirale, aber in 3D. Z-Koordinate ändert sich. Die Spirale wächse nach oben und unten, statt kleiner zu werden.  
+            * */
+            function createVertexDataHelix() {
+                var m = 32 //Anzahl Vertices pro Windung
+                var n = m * 3; //Es gibt drei Windungen, also müssen 3 * 32 Vertices erzeugt werden.
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var tn = 3 * 2 * Math.PI; // Y So sklaieren, dass es immer zwischen -1 und 1 liegt.
+                var dt = 2 * Math.PI / m; //dt = Schrittweite. Da die Spirale drei Windungen haben soll, muss pro Windung ein Drittel der Gesamt-Vertices berechnet werden. (m ist 1/3 von n)
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+
+                var r = 0.8; //Radius bleibt in diesem Fall konstant, da wir die z-Koordinate manipulieren. 
+
+                for (var i = 0; i <= n; i++, t += dt) {
+                    var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+                    var y = 0.5 - t / tn; // Y-Wert an Stelle t berechnen. Ist eigentlich der z Wert, würde aber nur wie ein Kreis aussehen, da wir von "oben", drauf schauen.
+                    var z = r * Math.sin(t); // Z-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+
+
+        </script>
+    </body>
+
+</html>

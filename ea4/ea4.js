@@ -9,7 +9,7 @@ var colors;
 main()
 
 function main() {
-    createVertexData();
+    createVertexData(6);
 
     configure(canvas1, "line_strip", vertices)
 }
@@ -99,9 +99,6 @@ function createProgram(gl, vsSource, fsSource) {
  Buffer Set up und rendern starten
  */
 function render(gl, mode, vertices, program) {
-
-
-
     /* == VERTEX POSITION BUFFER == */
     var vboPos = gl.createBuffer(); //Vertex Position Buffer erstellen
     gl.bindBuffer(gl.ARRAY_BUFFER, vboPos); //alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.
@@ -139,27 +136,27 @@ function render(gl, mode, vertices, program) {
 }
 
 
-function createVertexData() {
-    var n = 32 //Anzahl vertices.
-
+function createVertexData(numberVertexes) {
+    var n = numberVertexes
     // Positions.
-    vertices = new Float32Array(3 * (n + 1)); //3, weil die X, Y und Z Position jeweils hinterineander geschrieben wird. 
-
-    //colors
-    colors = new Float32Array(4 * (n));
-
+    vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
     // Index data for Linestip.
     indices = new Uint16Array(n + 1);
+    //colors
+    colors = new Float32Array(4 * (n)); //Für jedes Vertex gibt es 4 Werte (r,g,b,a)
 
 
-    var dt = 2 * Math.PI / n; //dt = Schrittweite. 
-    var t = 0;
+    var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. 
+    var dt = circle_Umfang / n; //dt = Schrittweite. 
+    var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
     var r = 1.0;
+
 
     var z = 0;
     for (var i = 0; i <= n; i++, t += dt) {
-        var x = r * Math.cos(t);
-        var y = r * Math.sin(t);
+        //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+        var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+        var y = r * Math.sin(t); // Y-Wert an Stelle t berechnen
 
         // Set vertex positions.
         vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
@@ -167,7 +164,7 @@ function createVertexData() {
         vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
 
         // Set index.
-        indices[i] = i;
+        indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
 
         //set color
         //Es muss so viele Farben geben, wie es Vertices gibt. 
@@ -181,3 +178,65 @@ function createVertexData() {
 
 }
 
+function createVertexData(numberVertexes) {
+    var n = numberVertexes
+    // Positions.
+    vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+    // Index data for Linestip.
+    indices = new Uint16Array(n + 1);
+    //colors
+    colors = new Float32Array(4 * (n)); //Für jedes Vertex gibt es 4 Werte (r,g,b,a)
+
+
+    var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. 
+    var dt = circle_Umfang / n; //dt = Schrittweite. 
+    var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+    var r = 1.0;
+
+    var beginX = -0.2 //X_0
+    var beginY = 0.1 //Y_0
+
+    var endX = 0.5 // X_Ende Beliebiger Endpunkt
+    var endY = 0.2 // Y_Ende
+
+    //Richtungsvektor = Liniensegment berechnen. Distanz zwischen Anfang- und Endpunkt
+    var V_x = endX - beginX
+    var V_y = endY - beginY
+
+    var dt = V_x / n; //dt = Schrittweite. 
+    var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+
+    var z = 0;
+    for (var i = 0; i <= n; i++, t += dt) {
+        //t = Ein Punkt auf der Linie. Erstes t Ist 0, letztes T ist 2 * PI.
+        var x = beginX + t * V_x; // X-Wert an Stelle t berechnen
+        var y = beginY + t * V_y; // Y-Wert an Stelle t berechnen
+
+        // Set vertex positions.
+        vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+        vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+        vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+        // Set index.
+        indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+        indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+
+        //set color
+        //Es muss so viele Farben geben, wie es Vertices gibt. 
+        colors[i * 4] = Math.random()// R
+        colors[i * 4 + 1] = Math.random() // G
+        colors[i * 4 + 2] = Math.random() // B
+        colors[i * 4 + 3] = 1 // A
+    }
+
+    console.dir(colors)
+
+}
+
+//Parametrisierte Form der Gleichung findnen: Die Gleichung finden, mit der man an jeder Stelle t die Positionen x, y (und ggf z) berechnen kann.
+// Kreis: x = r * cos(t) und y= r * sin(t).
+// Gerade: x = x_0 + t* v_x und  y = y_0 + t * v_y
+//Festlegen, wie viele punkte man sampeln will (n)
+//Schrittweite berechnen
+//x,y,z, Werte an jedem Punkt t sampeln und in vertex Array speichern
+//Index array speichern

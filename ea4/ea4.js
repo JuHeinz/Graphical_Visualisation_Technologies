@@ -1,23 +1,22 @@
 
 // Get the WebGL context.
 var canvas1 = document.getElementById('canvas1');
-var [vertexArray1, indexArray1] = createVertexDataPillow(10, 10);
+var [vertexArray1, indexArray1, triArray1] = createVertexDataPillow(10, 10);
 var canvas2 = document.getElementById('canvas2');
-var [vertexArray2, indexArray2] = createVertexDataHorn(10, 5);
+var [vertexArray2, indexArray2, triArray2] = createVertexDataHorn(10, 5);
 var canvas3 = document.getElementById('canvas3');
-var [vertexArray3, indexArray3] = createVertexDataOwn(29, 3);
+var [vertexArray3, indexArray3, triArray3] = createVertexDataOwn(29, 3);
 
 // scale vertex arrays to range [-1, +1]
 vertexArray1 = scaleVertices(vertexArray1);
 vertexArray2 = scaleVertices(vertexArray2);
 vertexArray3 = scaleVertices(vertexArray3);
 
-setup(canvas1, vertexArray1, indexArray1)
-setup(canvas2, vertexArray2, indexArray2)
-setup(canvas3, vertexArray3, indexArray3)
+setup(canvas1, vertexArray1, indexArray1, triArray1)
+//setup(canvas2, vertexArray2, indexArray2, triArray2)
+//setup(canvas3, vertexArray3, indexArray3, triArray3)
 
-function setup(canvas, vertexArray, indexArray) {
-
+function setup(canvas, vertexArray, indexArray, triArray) {
     var gl = canvas.getContext('experimental-webgl');
 
     // Pipeline setup.
@@ -72,15 +71,33 @@ function setup(canvas, vertexArray, indexArray) {
     var colAttrib = gl.getAttribLocation(prog, 'col');
     gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
 
-    // Setup index buffer object.
-    var ibo = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    // Setup index buffer object for lines
+    var iboLines = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexArray, gl.STATIC_DRAW);
-    ibo.numberOfElements = indexArray.length;
+    iboLines.numberOfElements = indexArray.length;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+    // Setup tris index buffer object.
+    var iboTris = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, triArray, gl.STATIC_DRAW);
+    iboTris.numberOfElements = triArray.length;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     // Clear framebuffer and render primitives.
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawElements(gl.LINES, ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+    // Setup rendering tris.
+    gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+    gl.drawElements(gl.TRIANGLES,
+        iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+    // Setup rendering lines.
+    gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+    gl.drawElements(gl.LINES,
+        iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 }
 
 
@@ -150,12 +167,15 @@ function createVertexDataPillow(vert, hor) {
     vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
     // Index data
     indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
+    indicesTris = new Uint16Array(3 * 2 * horizLines * vert_lines);
+
 
     var du = Math.PI / horizLines; //Schrittweite auf horizontaler Ebene  (u: [0, +pi])
     var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
 
     // Counter for entries in index array.
     var curIndexInIBO = 0;
+    var curIndexInTriIBO = 0;
 
     // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
     for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
@@ -201,9 +221,21 @@ function createVertexDataPillow(vert, hor) {
                 console.log(prevVertOnVertical + "->" + curVertice)
 
             }
+
+            // Set index.
+            // Two Triangles.
+            if (curVertical > 0 && curHorizontal > 0) {
+                indicesTris[curIndexInTriIBO++] = curVertice;
+                indicesTris[curIndexInTriIBO++] = curVertice - 1;
+                indicesTris[curIndexInTriIBO++] = curVertice - (vert_lines + 1);
+                //        
+                indicesTris[curIndexInTriIBO++] = curVertice - 1;
+                indicesTris[curIndexInTriIBO++] = curVertice - (vert_lines + 1) - 1;
+                indicesTris[curIndexInTriIBO++] = curVertice - (vert_lines + 1);
+            }
         }
     }
-    return [vertices, indices]
+    return [vertices, indices, indicesTris]
 }
 
 function createVertexDataHorn(vert, hor) {

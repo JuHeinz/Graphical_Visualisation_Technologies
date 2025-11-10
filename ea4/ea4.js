@@ -1,20 +1,63 @@
 
-// Get the WebGL context.
+// X, Y and Z calculations for the shapes
+
+//Pillow
+function x_Pillow(u, v) {
+    return Math.cos(u);
+}
+
+function z_Pillow(u, v) {
+    return Math.cos(v);
+}
+
+function y_Pillow(u, v) {
+    return 0.5 * Math.sin(u) * Math.sin(v)
+}
+
+//Horn
+function x_Horn(u, v) {
+    return (1 + u * Math.cos(v)) * Math.sin(Math.PI * u)
+}
+
+function y_Horn(u, v) {
+    return (1 + u * Math.cos(v)) * Math.cos(Math.PI * u) + u;
+}
+
+function z_Horn(u, v) {
+    return u * Math.sin(v)
+}
+
+//Own
+function x_Own(u, v) {
+    return Math.cos(u);
+}
+
+function y_Own(u, v) {
+    return Math.cos(v);
+}
+
+function z_Own(u, v) {
+    return Math.sin(v);
+}
+
 var canvas1 = document.getElementById('canvas1');
-var [vertexArray1, indexArray1, triArray1] = createVertexDataPillow(10, 10);
 var canvas2 = document.getElementById('canvas2');
-var [vertexArray2, indexArray2, triArray2] = createVertexDataHorn(10, 5);
 var canvas3 = document.getElementById('canvas3');
-var [vertexArray3, indexArray3, triArray3] = createVertexDataOwn(29, 3);
+
+// Arrays berechnen
+var [vertexArray1, indexArray1, triArray1] = createVertexData(10, 10, x_Pillow, y_Pillow, z_Pillow, Math.PI, (2 * Math.PI));
+var [vertexArray2, indexArray2, triArray2] = createVertexData(10, 5, x_Horn, y_Horn, z_Horn, 1, (2 * Math.PI));
+var [vertexArray3, indexArray3, triArray3] = createVertexData(40, 2, x_Own, y_Own, z_Own, (2 * Math.PI), (2 * Math.PI));
 
 // scale vertex arrays to range [-1, +1]
 vertexArray1 = scaleVertices(vertexArray1);
 vertexArray2 = scaleVertices(vertexArray2);
 vertexArray3 = scaleVertices(vertexArray3);
 
-setup(canvas1, vertexArray1, indexArray1, triArray1)
-//setup(canvas2, vertexArray2, indexArray2, triArray2)
-//setup(canvas3, vertexArray3, indexArray3, triArray3)
+
+setup(canvas1, vertexArray1, indexArray1, triArray1,)
+setup(canvas2, vertexArray2, indexArray2, triArray2)
+setup(canvas3, vertexArray3, indexArray3, triArray3)
 
 function setup(canvas, vertexArray, indexArray, triArray) {
     var gl = canvas.getContext('experimental-webgl');
@@ -87,6 +130,7 @@ function setup(canvas, vertexArray, indexArray, triArray) {
 
     // Clear framebuffer and render primitives.
     gl.clear(gl.COLOR_BUFFER_BIT);
+
     // Setup rendering tris.
     gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
@@ -101,66 +145,7 @@ function setup(canvas, vertexArray, indexArray, triArray) {
 }
 
 
-/**
- * Spinnennetz. Es gibt nicht mehr ein t, sondern zwei Parameter: u,v. Hier abgegbildet durch r und t.
- * Parametrisiert erstmal genau wie Kreis
- * x = r * cos(t)
- * y = r * sin(t)
- * 
- * Jeder Ring hat einen eigenen Radius r.
- * Jeder Strahl hat einen eigenen Winkel (= Punkt auf dem Umfang) t.
- * 
-*/
-function createVertexDataWeb(number_beams, number_circles) {
-    var n_num_beam = number_beams; //Anzahl der Punkte auf dem Radius -> Anzahl der Strahlen
-    var m_num_Circ = number_circles; //Anzahl der Kreise
-    // Positions.
-    vertices = new Float32Array(3 * (n_num_beam + 1) * (m_num_Circ + 1));
-    // Index data for
-    indices = new Uint16Array(2 * 2 * n_num_beam * m_num_Circ);
-
-    var dt = 2 * Math.PI / n_num_beam; //Schrittweite für Winkel t. Kreisumfang geteilt durch Anzahl der Strahlen.
-    var dr = 1 / m_num_Circ; //Schrittweite für Radius r. 
-
-    // Counter for entries in index array.
-    var currentIBOIndex = 0;
-
-    // Loop Winkel t. Bei jedem Durchgang wird ein Schritt auf dem Umfang gegangen. 
-    for (var i_currentBeam = 0, t = 0; i_currentBeam <= n_num_beam; i_currentBeam++, t += dt) {
-
-        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
-        for (var j_currentCirc = 0, r = 0; j_currentCirc <= m_num_Circ; j_currentCirc++, r += dr) {
-
-            var currentVertexIndex = i_currentBeam * (m_num_Circ + 1) + j_currentCirc;
-
-            var x = r * Math.cos(t);
-            var y = r * Math.sin(t);
-            var z = 0;
-
-            //VERTEX ARRAY
-            // X, Y und Z für aktuellen Vertex speichern.
-            vertices[currentVertexIndex * 3] = x; //Jeder 3. eintrag ist die X position.
-            vertices[currentVertexIndex * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
-            vertices[currentVertexIndex * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
-
-            // INDEX ARRAY
-            // Line on beam.
-            if (j_currentCirc > 0 && i_currentBeam > 0) {
-                indices[currentIBOIndex++] = currentVertexIndex - 1;
-                indices[currentIBOIndex++] = currentVertexIndex;
-            }
-
-            // Line on ring.
-            if (j_currentCirc > 0 && i_currentBeam > 0) {
-                indices[currentIBOIndex++] = currentVertexIndex - (m_num_Circ + 1);
-                indices[currentIBOIndex++] = currentVertexIndex;
-            }
-        }
-    }
-    return [vertices, indices]
-}
-
-function createVertexDataPillow(vert, hor) {
+function createVertexData(vert, hor, x_func, y_func, z_func, wertebereich_u, wertebereich_v) {
     var horizLines = vert;
     var vert_lines = hor;
     // Positions.
@@ -170,24 +155,24 @@ function createVertexDataPillow(vert, hor) {
     indicesTris = new Uint16Array(3 * 2 * horizLines * vert_lines);
 
 
-    var du = Math.PI / horizLines; //Schrittweite auf horizontaler Ebene  (u: [0, +pi])
-    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
+    var du = wertebereich_u / horizLines; //Schrittweite auf horizontaler Ebene  
+    var dv = wertebereich_v / vert_lines; //Schrittweite auf vertikaler Ebene 
 
     // Counter for entries in index array.
     var curIndexInIBO = 0;
     var curIndexInTriIBO = 0;
 
-    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
+    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der horizontalen Ebene gegangen. 
     for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
 
-        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
+        // Loop Vertikaler Ebene. Bei jedem Durchgang wird ein Schritt auf der vertikalen Ebene gegangen. 
         for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
 
             //Counter für die Vertice, die wir gerade berechnen. 
             var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
-            var x = Math.cos(u); // X-Wert an Stelle u berechnen
-            var z = Math.cos(v); // Y-Wert an Stelle v berechnen
-            var y = 0.5 * Math.sin(u) * Math.sin(v)
+            var x = x_func(u, v)
+            var z = z_func(u, v)
+            var y = y_func(u, v)
 
             //VERTEX ARRAY
             // X, Y und Z für aktuellen Vertex speichern.
@@ -212,7 +197,7 @@ function createVertexDataPillow(vert, hor) {
             }
 
             /* Abschnitt auf Vertikale
-                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
+                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Vertikale, aber  andere Horizontale 
             */
             if (curVertical > 0 && curHorizontal > 0) {
                 var prevVertOnVertical = curVertice - (vert_lines + 1);
@@ -222,8 +207,8 @@ function createVertexDataPillow(vert, hor) {
 
             }
 
-            // Set index.
-            // Two Triangles.
+            // Berechnen der Triangles
+
             if (curVertical > 0 && curHorizontal > 0) {
                 indicesTris[curIndexInTriIBO++] = curVertice;
                 indicesTris[curIndexInTriIBO++] = curVertice - 1;
@@ -236,192 +221,6 @@ function createVertexDataPillow(vert, hor) {
         }
     }
     return [vertices, indices, indicesTris]
-}
-
-function createVertexDataHorn(vert, hor) {
-    var horizLines = vert;
-    var vert_lines = hor;
-    // Positions.
-    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
-    // Index data
-    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
-
-    var du = 1 / horizLines; //Schrittweite auf horizontaler Ebene  (u: [0, +pi])
-    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
-
-    // Counter for entries in index array.
-    var curIndexInIBO = 0;
-
-    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
-    for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
-
-        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
-        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
-            //Counter für die Vertice, die wir gerade berechnen. 
-            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
-            var x = (1 + u * Math.cos(v)) * Math.sin(Math.PI * u);
-            var y = (1 + u * Math.cos(v)) * Math.cos(Math.PI * u) + u;
-            var z = u * Math.sin(v)
-
-            //VERTEX ARRAY
-            // X, Y und Z für aktuellen Vertex speichern.
-            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
-            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
-            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
-            console.log("_____")
-            console.log("#", curVertice, "|(" + x + "|" + y + ")")
-
-            // INDEX ARRAY
-
-            /* Abschnitt auf Horizontale
-             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevOnHorizontal = curVertice - 1;
-                indices[curIndexInIBO++] = prevOnHorizontal;
-
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevOnHorizontal + "->" + curVertice)
-
-            }
-
-            /* Abschnitt auf Vertikale
-                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevVertOnVertical = curVertice - (vert_lines + 1);
-                indices[curIndexInIBO++] = prevVertOnVertical
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevVertOnVertical + "->" + curVertice)
-
-            }
-        }
-    }
-    return [vertices, indices]
-}
-
-function createVertexDataOwn(vert, hor) {
-    var horizLines = vert;
-    var vert_lines = hor;
-    // Positions.
-    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
-    // Index data
-    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
-
-    var du = (2 * Math.PI) / horizLines; //Schrittweite auf horizontaler Ebene  (u: [-pi +pi])
-    var dv = (2 * Math.PI) / vert_lines; //Schrittweite auf vertikaler Ebene (v: [-pi, +pi])
-
-    // Counter for entries in index array.
-    var curIndexInIBO = 0;
-
-    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
-    for (var curHorizontal = 0, u = Math.PI / 17; curHorizontal <= horizLines; curHorizontal++, u += du) {
-
-        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
-        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
-            //Counter für die Vertice, die wir gerade berechnen. 
-            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
-            var x = Math.cos(u);
-            var y = Math.cos(v);
-            var z = Math.sin(v);
-
-            //VERTEX ARRAY
-            // X, Y und Z für aktuellen Vertex speichern.
-            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
-            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
-            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
-            console.log("_____")
-            console.log("#", curVertice, "|(" + x + "|" + y + ")")
-
-            // INDEX ARRAY
-
-            /* Abschnitt auf Horizontale
-             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevOnHorizontal = curVertice - 1;
-                indices[curIndexInIBO++] = prevOnHorizontal;
-
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevOnHorizontal + "->" + curVertice)
-
-            }
-
-            /* Abschnitt auf Vertikale
-                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevVertOnVertical = curVertice - (vert_lines + 1);
-                indices[curIndexInIBO++] = prevVertOnVertical
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevVertOnVertical + "->" + curVertice)
-
-            }
-        }
-    }
-    return [vertices, indices]
-}
-function createVertexDataGrid(vert, hor) {
-    var horizLines = vert;
-    var vert_lines = hor;
-    // Positions.
-    vertices = new Float32Array(3 * (horizLines + 1) * (vert_lines + 1));
-    // Index data
-    indices = new Uint16Array(2 * 2 * horizLines * vert_lines);
-
-    var du = 1 / horizLines; //Schrittweite auf horizontaler Ebene
-    var dv = 1 / vert_lines; //Schrittweite auf vertikaler Ebene
-
-    // Counter for entries in index array.
-    var curIndexInIBO = 0;
-
-    // Loop Horizontale Ebene. Bei jedem Loop wird ein Schritt auf der Horizontalen Ebene gegangen. 
-    for (var curHorizontal = 0, u = 0; curHorizontal <= horizLines; curHorizontal++, u += du) {
-
-        // Loop Radius r. Bei jedem Durchgang wird der Radius um dr größer.
-        for (var curVertical = 0, v = 0; curVertical <= vert_lines; curVertical++, v += dv) {
-
-            //Counter für die Vertice, die wir gerade berechnen. 
-            var curVertice = curHorizontal * (vert_lines + 1) + curVertical;
-            var x = v; // X-Wert an Stelle t berechnen
-            var y = u; // Y-Wert an Stelle t berechnen
-            var z = 1
-
-            //VERTEX ARRAY
-            // X, Y und Z für aktuellen Vertex speichern.
-            vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
-            vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
-            vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
-            console.log("_____")
-            console.log("#", curVertice, "|(" + x + "|" + y + ")")
-
-            // INDEX ARRAY
-
-            /* Abschnitt auf Horizontale
-             Linie zwischen der aktuellen Vertice und dem Vertice auf der gleichen Horizontale aber andere Vertikale
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevOnHorizontal = curVertice - 1;
-                indices[curIndexInIBO++] = prevOnHorizontal;
-
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevOnHorizontal + "->" + curVertice)
-
-            }
-
-            /* Abschnitt auf Vertikale
-                Linie zwischen der aktuellen Vertice zur Vertice auf dem gleichen Ring, aber einen Winkel-Schritt voher. 
-            */
-            if (curVertical > 0 && curHorizontal > 0) {
-                var prevVertOnVertical = curVertice - (vert_lines + 1);
-                indices[curIndexInIBO++] = prevVertOnVertical
-                indices[curIndexInIBO++] = curVertice;
-                console.log(prevVertOnVertical + "->" + curVertice)
-
-            }
-        }
-    }
-    return [vertices, indices]
 }
 
 /**

@@ -49,7 +49,7 @@
             // Positions, index data.
             var vertices, indices;
             // Fill the data arrays.
-            createVertexDataHelix();
+            createVertexDataCircle3();
 
             // Setup position vertex buffer object.
             var vboPos = gl.createBuffer();
@@ -62,7 +62,7 @@
                 gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(posAttrib);
 
-            // Setup constant color.
+            // Setup constant color without using color buffer.
             var colAttrib = gl.getAttribLocation(prog, 'col');
             gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
 
@@ -81,7 +81,7 @@
 
             /**
              * Parametrisierte Form eines Liniensegments =
-             *  x = x_0 + t* v_x
+             *  x = x_0 + t * v_x
              *  y = y_0 + t * v_y
              * 
              * (x_0, y_0) -> Anfangspunkt 
@@ -94,18 +94,17 @@
                 // Index data for Linestip.
                 indices = new Uint16Array(n + 1);
 
-                //geradengleichung = 
                 var beginX = -0.2 //X_0
                 var beginY = 0.1 //Y_0
 
-                var endX = 0.5 // X_Ende Beliebiger Endpunkt
+                var endX = 0.3 // X_Ende Beliebiger Endpunkt
                 var endY = 0.2 // Y_Ende
 
-                //Richtungsvektor = Liniensegment berechnen. Distanz zwischen Anfang- und Endpunkt
+                //Richtungsvektor = Liniensegment berechnen. Distanz zwischen Anfang- und Endpunkt.
                 var V_x = endX - beginX
                 var V_y = endY - beginY
 
-                var dt = V_x / n; //dt = Schrittweite. 
+                var dt = 1 / n; //dt = Schrittweite. 
                 var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
 
                 var z = 0;
@@ -126,6 +125,18 @@
 
             }
 
+            /**
+             * Allgemeine parametrische Form einer 2D Kurve
+             * x = f(t)
+             * y = g(t)
+             * Für jeden Wert von t wird genau ein Punkt auf der Kurve generiert.
+             * 
+             * Wenn man n Punkte auf einer Kurve haben will, muss man die zwischen dem Anfangspunkt (f(t_0), g(t_0)) und dem Endpunkt (f(t_n), g(t_n)), muss man n+1 Punkte auf dieser Kurve bestimmen.
+             * Diese lauten (f(t_i), g(t_i)) mit i = 0 bis n.
+             * dt beschreibt die Schrittweite. Sie wird berechnet in dem wir die Distanz zwischen dem letzten und dem ersten Punkt durch n teilen. dt = (t_n - t_0) / n 
+             * Nach dem Schritt t_i  sind wir dann am Punkt t_i = t_0 + i * dt.
+             *                
+             ** */
 
             /**
              * Kreis
@@ -140,7 +151,7 @@
                 // Index data for Linestip.
                 indices = new Uint16Array(n + 1);
 
-                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. 
+                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
                 var dt = circle_Umfang / n; //dt = Schrittweite. 
                 var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
                 var r = 1.0;
@@ -161,6 +172,91 @@
                 }
             }
 
+            function createVertexDataCircle2() {
+                var n = 320
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
+                var dt = circle_Umfang / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var r = 1.0;
+
+                var z = 0;
+                for (var i = 0; i <= n; i++, t += dt) {
+                    //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+                    var x = r * Math.sin(4 * t); // X-Wert an Stelle t berechnen
+                    var y = r * Math.sin(3 * t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+            function createVertexDataCircle3() {
+                var n = 40
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
+                var dt = circle_Umfang / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var r = 0.5;
+
+                var z = 0;
+                for (var i = 0; i <= n; i++, t += dt) {
+                    //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+                    var x = r * 2 * Math.cos(t) + Math.cos(5 * t); // X-Wert an Stelle t berechnen
+                    var y = r * 2 * Math.sin(t) + Math.sin(5 * t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+            function createVertexDataCircle4() {
+                var n = 40
+                // Positions.
+                vertices = new Float32Array(3 * (n + 1)); // Mal drei, da es für jeden vertice drei Koordinaten gibt (X,Y,Z). Plus 1, da auch für den Startpunkt ein Vertice erzeugt wird.
+                // Index data for Linestip.
+                indices = new Uint16Array(n + 1);
+
+                var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
+                var dt = circle_Umfang / n; //dt = Schrittweite. 
+                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var r = 0.5;
+
+                var z = 0;
+                for (var i = 0; i <= n; i++, t += dt) {
+                    //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+                    var x = r * 2 * Math.cos(t) + Math.cos(5 * t); // X-Wert an Stelle t berechnen
+                    var y = r * 2 * Math.sin(t) + Math.sin(5 * t); // Y-Wert an Stelle t berechnen
+
+                    // Set vertex positions.
+                    vertices[i * 3] = x; // i *3 = jeder dritte eintrag ist die X position.
+                    vertices[i * 3 + 1] = y; // i*3 + 1 = jeder vierte eintrag ist die y position 
+                    vertices[i * 3 + 2] = z; // i *3 +2 = jeder fünfte eintrag ist die z position
+
+                    // Set index.
+                    indices[i] = i; //Index Array sehr einfach, da jedes Vertex nur einmal vorkommt.
+                }
+            }
+
+
             /**
              * Spirale
              * Hier hängt der Radius von t ab. 
@@ -174,7 +270,7 @@
                 indices = new Uint16Array(n + 1);
 
                 var dt = 2 * Math.PI / n; //dt = Schrittweite. 
-                var t = 0; //i dient der Indezierung der Vertexes. In diesem Fall könnte man auch t verwenden. 
+                var t = 0; //Current Step. 
                 var z = 0;
                 var r = 1;
 

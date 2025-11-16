@@ -1,0 +1,13 @@
+canvas {
+    border: 1px solid black;
+    width: 500px;
+    height: 500px;
+}
+
+.code-segment {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff16;
+    padding: 1em;
+    border-radius: 1rem;
+}

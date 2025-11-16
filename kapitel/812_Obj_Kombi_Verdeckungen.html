@@ -25,7 +25,7 @@
 			gl.enable(gl.DEPTH_TEST); //Anschalten des Tiefentests
 			gl.depthFunc(gl.LEQUAL); //EQUAL = Neu hinzugefügtes Fragment muss eine kleinere oder gleiche Tiefe zur Kamera haben, wie bestehende, um hinzugefügt werden zu können.
 
-			/* Polygone ( GReiecke, im Gegensatz zu Linien) nach Hinten verschieben, um z-Bleeding zu vermeiden) */
+			/* Polygone (Dreiecke, im Gegensatz zu Linien) nach Hinten verschieben, um z-Bleeding zu vermeiden) */
 			// Polygon offset of rastered Fragments.
 			gl.enable(gl.POLYGON_OFFSET_FILL);
 			gl.polygonOffset(1.0, 1.0);
@@ -207,7 +207,6 @@
 			ibo.numberOfElements = indices.length;
 
 			/* HELIX RENDERN */
-			// Clear framebuffer and render primitives.
 			gl.drawElements(gl.LINE_STRIP,
 				ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
 

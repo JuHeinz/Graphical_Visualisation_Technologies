@@ -19,7 +19,7 @@ var vertices = new Float32Array([
     0, 5 //8
 ]);
 // Index data "Haus des Nikolaus mit Tür"
-var indices = new Uint16Array([
+var indicesLines = new Uint16Array([
     0, 1, 2, 0, 2, 8, 2, 7, 8, 2, 3, 7, 3, 6, 7, 3, 5, 6, 3, 4, 5]);
 
 var colors = new Float32Array(
@@ -91,7 +91,7 @@ async function configure(canvas, modeString, verticeArray) {
             break;
     }
 
-    render(gl, mode, verticeArray, program);
+    prepareBuffer(gl, mode, verticeArray, program);
 }
 
 
@@ -128,7 +128,7 @@ function createProgram(gl, vsSource, fsSource) {
  * 
  Buffer Set up und rendern starten
  */
-function render(gl, mode, vertices, program) {
+function prepareBuffer(gl, mode, vertices, program) {
     /* == VERTEX POSITION BUFFER == */
     var vboPos = gl.createBuffer(); //Vertex Position Buffer erstellen
     gl.bindBuffer(gl.ARRAY_BUFFER, vboPos); //alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.
@@ -156,8 +156,8 @@ function render(gl, mode, vertices, program) {
     /* Der Index Buffer muss der letzte Buffer sein, der an gl gebunden ist, bevor gl.drawElements aufgerufen wird! */
     var ibo = gl.createBuffer(); //Ein index buffer sagt die Reihenfolge an, mit der Die Vertices verbunden werden sollen. 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    ibo.numerOfEmements = indices.length;
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines, gl.STATIC_DRAW);
+    ibo.numerOfEmements = indicesLines.length;
 
     /* == RENDERN STARTEN == */
     gl.clear(gl.COLOR_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.

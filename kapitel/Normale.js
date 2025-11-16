@@ -1,58 +1,12 @@
-
-
-var canvas1 = document.getElementById('canvas1');
-var canvas2 = document.getElementById('canvas2');
 var canvas3 = document.getElementById('canvas3');
 var canvas4 = document.getElementById('canvas4');
 
 var r = 0.3
 
-/* ZYLINDER */
 /* 
- Mantel eines Zyliners von der Seite.
- Mehrere Kreise, die übereinander liegen.
- Die Kreise haben immer den Radius r. 
- u-Ebene = Winkel im Kreis
- v-Ebene = Höhe
-
- */
-function x_Zylinder(u, v) {
-    return r * Math.cos(u);
-}
-
-function z_Zylinder(u, v) {
-    return r * Math.sin(u);
-}
-
-function y_Zylinder(u, v) {
-    return v
-}
-
-
-var [vertexArray1, indicesLines1, indicesTris1] = createVertexData(32, 4, x_Zylinder, y_Zylinder, z_Zylinder, 0, 2 * Math.PI, 0, 1);
-
-/* KEGEL */
-/*
-    Mantel eines Kegels von der Seite.
-    Mehrere Kreise, die übereinander liegen. 
-    u-Ebene = Winkel im Kreis
-    v-Ebene = Höhe
-    Der Radius der Kreise ist abhängig von der Höhe v.
+    Wie das Vertice zeigt, wird durch die Normale berechnet.
+    Die Berechnung der normalen erfolgt bei jeder Form durch eine andere Formel.
 */
-
-function x_Kegel(u, v) {
-    return v * Math.cos(u)
-}
-
-function y_Kegel(u, v) {
-    return v * Math.sin(u);
-}
-
-function z_Kegel(u, v) {
-    return -v
-}
-var [vertexArray2, indicesLines2, indicesTris2] = createVertexData(32, 4, x_Kegel, z_Kegel, y_Kegel, 0, 2 * Math.PI, 0, 1);
-
 
 /* KUGEL */
 /*
@@ -71,43 +25,25 @@ function z_Kugel(u, v) {
     return r * Math.cos(v);
 }
 
-var [vertexArray3, indicesLines3, indicesTris3] = createVertexData(10, 10, x_Kugel, z_Kugel, y_Kugel, 0, 2 * Math.PI, 0, Math.PI);
-
-
-/* TORUS */
-
-/*
-    Besteht aus zwei Kreisen, die Senkrecht zueinander stehen.    
-    Es gibt einen äußeren Kreis mit (kleinerem) Radius r -> Der Donut-Teig: Oben die Glasur unten der Boden.
-    und einen inneren Kreis mit einem größeren Radius R -> Das Donut Loch.
-    
-    u = Winkel auf äußerem Kreis. Von Glasur bis Boden. 
-    v = Winkel auf dem inneren Kreis. (Donutloch)
-*/
-
-var R = r + 0.2; // Innerer Radius muss größer sein als äußerer Radius. 
-
-function x_Torus(u, v) {
-    return (R + r * Math.cos(u)) * Math.cos(v);
+function xNorm_Kugel(x, y, z) {
+    var vertexLength = Math.sqrt(x * x + y * y + z * z);
+    return x / vertexLength;
 }
 
-function y_Torus(u, v) {
-    return (R + r * Math.cos(u)) * Math.sin(v);
+function yNorm_Kugel(x, y, z) {
+    var vertexLength = Math.sqrt(x * x + y * y + z * z);
+    return y / vertexLength;
 }
 
-function z_Torus(u, v) {
-    return r * Math.sin(u);
+function zNorm_Kugel(x, y, z) {
+    var vertexLength = Math.sqrt(x * x + y * y + z * z);
+    return z / vertexLength;
 }
+var [vertexArray1, indicesLines1, indicesTris1, normals1] = createVertexData(32, 32, x_Kugel, y_Kugel, z_Kugel, 0, 2 * Math.PI, 0, Math.PI, xNorm_Kugel, yNorm_Kugel, zNorm_Kugel);
 
-var [vertexArray4, indicesLines4, indicesTris4] = createVertexData(32, 32, x_Torus, y_Torus, z_Torus, 0, 2 * Math.PI, 0, 2 * Math.PI);
+setup(canvas1, vertexArray1, indicesLines1, indicesTris1, normals1)
 
-
-setup(canvas1, vertexArray1, indicesLines1, indicesTris1)
-setup(canvas1, vertexArray2, indicesLines2, indicesTris2)
-setup(canvas3, vertexArray3, indicesLines3, indicesTris3)
-setup(canvas4, vertexArray4, indicesLines4, indicesTris4)
-
-function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
+function setup(canvas, vertexArray, indexArrayLines, indexArrayTris, normals) {
     var gl = canvas.getContext('experimental-webgl');
 
     // Pipeline setup.
@@ -117,12 +53,26 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
+    // Depth(Z)-Buffer.
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    // Polygon offset of rastered Fragments.
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(0.5, 0);
+
     // Compile vertex shader. 
+    // Die Werte für R, G und B sind von der z, y und z Komponenten der Normalen abhängig. 
+    // Je höher der X Wert (weiter rechts), desto Roter das Vertice
+    // Je Höher der Y Wert (weiter oben), desto Grüner das Vertice
+    // Je Höher der Z Wert (näher zum Betrachter), desto Blauer das Vertice
+
+    // 
     var vsSource = '' +
         'attribute vec3 pos;' +
-        'attribute vec4 col;' +
+        'attribute vec3 col;' +
         'varying vec4 color;' +
-        'void main(){' + 'color = col;' +
+        'void main(){' +
+        'color = vec4(col.x, col.y, col.z, 1);' +
         'gl_Position = vec4(pos, 1);' +
         '}';
     var vs = gl.createShader(gl.VERTEX_SHADER);
@@ -147,7 +97,7 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
     gl.linkProgram(prog);
     gl.useProgram(prog);
 
-
+    //VERTEX BUFFER
     // Setup position vertex buffer object.
     var vboPos = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
@@ -158,10 +108,18 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
     gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(posAttrib);
 
-    // Setup constant color.
-    var colAttrib = gl.getAttribLocation(prog, 'col');
-    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1);
+    //NORMALS BUFFER
+    // Setup normal vertex buffer object.
+    var vboNormal = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vboNormal);
+    gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
 
+    // Den Normalen Buffer mit dem Attribut Farbe im Vertex Shader verbinden.
+    var colAttrib = gl.getAttribLocation(prog, 'col');
+    gl.vertexAttribPointer(colAttrib, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(colAttrib);
+
+    //INDEX BUFFER LINES
     // Setup index buffer object for lines
     var iboLines = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
@@ -169,6 +127,7 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
     iboLines.numberOfElements = indexArrayLines.length;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
+    //INDEX BUFFER TRIS
     // Setup tris index buffer object.
     var iboTris = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
@@ -177,17 +136,15 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     // Clear framebuffer and render primitives.
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
-    // Setup rendering tris.
-    gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1); //Füllfarbe
+    // RENDER TRIS
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
-    gl.drawElements(gl.TRIANGLES,
-        iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
-    // Setup rendering lines.
-    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1); //Linienfarbe
+    // RENDER LINES
+    gl.disableVertexAttribArray(colAttrib);
+    gl.vertexAttrib3f(colAttrib, 0, 0, 0); //Linienfarbe
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
     gl.drawElements(gl.LINES, iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 }
@@ -203,14 +160,21 @@ function setup(canvas, vertexArray, indexArrayLines, indexArrayTris) {
  * @param {*} u_Max     Maximaler Wert des Parameters u, zur Berechnung, der Schrittweite du
  * @param {*} v_Min     Minimaler Wert des Parameters v, dient als Startwert des inneren Loops 
  * @param {*} v_Max     Maximaler Wert des Parameters v, zur Berechnung, der Schrittweite dv
+ * @param {*} xNorm     Funktion zur Berechnung der x-Komponente der Normalen
+ * @param {*} yNorm     Funktion zur Berechnung der y-Komponente der Normalen
+ * @param {*} zNorm     Funktion zur Berechnung der z-Komponente der Normalen
+
  * @returns 
  */
-function createVertexData(n, m, x_func, y_func, z_func, u_Min, u_Max, v_Min, v_Max) {
+function createVertexData(n, m, x_func, y_func, z_func, u_Min, u_Max, v_Min, v_Max, xNorm, yNorm, zNorm) {
     // Vertex Array (Positionen der Vertices)
     var vertices = new Float32Array(3 * (n + 1) * (m + 1));
     // Index data (Reihenfolge der Vertices)
     var indicesLines = new Uint16Array(2 * 2 * n * m); //für Lines 
     var indicesTris = new Uint16Array(3 * 2 * n * m); // Für Triangles
+
+    //Normale der Vertices
+    var normals = new Float32Array(3 * (n + 1) * (m + 1));
 
     var du = u_Max / n; //Schrittweite auf u-Ebene  
     var dv = v_Max / m; //Schrittweite auf v-Ebene
@@ -236,6 +200,12 @@ function createVertexData(n, m, x_func, y_func, z_func, u_Min, u_Max, v_Min, v_M
             vertices[curVertice * 3] = x; //Jeder 3. eintrag ist die X position.
             vertices[curVertice * 3 + 1] = y; //Jeder 4. eintrag ist die Y position.
             vertices[curVertice * 3 + 2] = z; //Jeder 5. eintrag ist die Z position.
+
+            //NORMALS ARRAY
+            // Calc and set normals.
+            normals[curVertice * 3] = xNorm(x, y, z)
+            normals[curVertice * 3 + 1] = yNorm(x, y, z)
+            normals[curVertice * 3 + 2] = zNorm(x, y, z)
 
             // INDEX ARRAY
             /* 
@@ -276,7 +246,7 @@ function createVertexData(n, m, x_func, y_func, z_func, u_Min, u_Max, v_Min, v_M
 
         }
     }
-    return [vertices, indicesLines, indicesTris]
+    return [vertices, indicesLines, indicesTris, normals]
 }
 
 

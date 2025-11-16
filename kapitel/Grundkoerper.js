@@ -12,8 +12,8 @@ var r = 0.3
  Mantel eines Zyliners von der Seite.
  Mehrere Kreise, die übereinander liegen.
  Die Kreise haben immer den Radius r. 
- u = Winkel im Kreis
- v = Höhe
+ u-Ebene = Winkel im Kreis
+ v-Ebene = Höhe
 
  */
 function x_Zylinder(u, v) {
@@ -33,11 +33,11 @@ var [vertexArray1, indicesLines1, indicesTris1] = createVertexData(32, 4, x_Zyli
 
 /* KEGEL */
 /*
- Mantel eines Kegels von der Seite.
- Mehrere Kreise, die übereinander liegen. 
- Der Radius der Kreise ist abhängig von der Höhe v.
- u = Winkel im Kreis
- v = Höhe
+    Mantel eines Kegels von der Seite.
+    Mehrere Kreise, die übereinander liegen. 
+    u-Ebene = Winkel im Kreis
+    v-Ebene = Höhe
+    Der Radius der Kreise ist abhängig von der Höhe v.
 */
 
 function x_Kegel(u, v) {
@@ -56,7 +56,6 @@ var [vertexArray2, indicesLines2, indicesTris2] = createVertexData(32, 4, x_Kege
 
 /* KUGEL */
 /*
-    Eine Kugel.
     u = Winkel auf dem Kreis, der um den Äquator geht.
     v = Winkel auf dem Kreis, der von Nordpol zu Südpol geht.
 */
@@ -77,14 +76,23 @@ var [vertexArray3, indicesLines3, indicesTris3] = createVertexData(10, 10, x_Kug
 
 /* TORUS */
 
-outerRadius = r + 0.2; //Äußerer Radius des Torus muss größer sein als der innere Radius (das Loch)
+/*
+    Besteht aus zwei Kreisen, die Senkrecht zueinander stehen.    
+    Es gibt einen äußeren Kreis mit (kleinerem) Radius r -> Der Donut-Teig: Oben die Glasur unten der Boden.
+    und einen inneren Kreis mit einem größeren Radius R -> Das Donut Loch.
+    
+    u = Winkel auf äußerem Kreis. Von Glasur bis Boden. 
+    v = Winkel auf dem inneren Kreis. (Donutloch)
+*/
+
+var R = r + 0.2; // Innerer Radius muss größer sein als äußerer Radius. 
 
 function x_Torus(u, v) {
-    return (outerRadius + r * Math.cos(u)) * Math.cos(v);
+    return (R + r * Math.cos(u)) * Math.cos(v);
 }
 
 function y_Torus(u, v) {
-    return (outerRadius + r * Math.cos(u)) * Math.sin(v);
+    return (R + r * Math.cos(u)) * Math.sin(v);
 }
 
 function z_Torus(u, v) {

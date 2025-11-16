@@ -86,13 +86,28 @@ function configure(canvas) {
         'gl_FragColor = color;' +
         '}';
 
-    let program = createProgram(gl, vsSource, fsSource)
+    let prog = createProgram(gl, vsSource, fsSource)
 
+    //Create Arrays for form 1
     var [vertices, indicesLines, indicesTris] = createVertexData(32, 4, x_Zylinder, y_Zylinder, z_Zylinder, 0, 2 * Math.PI, 0, 1);
-    prepareBuffer(gl, program, vertices, indicesLines, indicesTris);
 
+    //Create Buffer for form 1
+    var [iboTris1, iboLines1] = prepareBuffer(gl, prog, vertices, indicesLines, indicesTris);
+
+    //Clear frame and depth-Buffer
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.
+
+    //Render form 1
+    render(gl, prog, iboTris1, iboLines1)
+
+    //Create Arrays for Form 2
     var [vertices, indicesLines, indicesTris] = createVertexData(10, 10, x_Kugel, z_Kugel, y_Kugel, 0, 2 * Math.PI, 0, Math.PI);
-    prepareBuffer(gl, program, vertices, indicesLines, indicesTris);
+
+    //Create Buffer for form 2
+    var [iboTris2, iboLines2] = prepareBuffer(gl, prog, vertices, indicesLines, indicesTris);
+
+    //Render form 2, do not clear buffer beforehand. 
+    render(gl, prog, iboTris2, iboLines2)
 }
 
 /**
@@ -125,6 +140,7 @@ function createProgram(gl, vsSource, fsSource) {
  Buffer Set up und rendern starten
  */
 function prepareBuffer(gl, prog, vertices, indicesLines, indicesTris) {
+
     /* == VERTEX POSITION BUFFER == */
     var vboPos = gl.createBuffer(); //Vertex Position Buffer erstellen
     gl.bindBuffer(gl.ARRAY_BUFFER, vboPos); //Bind Buffer = alle folgenden Befehle auf gl beziehen sich auf diesen Buffer.
@@ -136,8 +152,6 @@ function prepareBuffer(gl, prog, vertices, indicesLines, indicesTris) {
     gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
     // 3 = Die Dimensionen des Attributs (x, y & z)
     gl.enableVertexAttribArray(posAttrib);
-
-
 
     /* == LINE INDEX BUFFER == */
     /* Der Index Buffer muss der letzte Buffer sein, der an gl gebunden ist, bevor gl.drawElements aufgerufen wird! */
@@ -156,14 +170,19 @@ function prepareBuffer(gl, prog, vertices, indicesLines, indicesTris) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 
-    /* == RENDERN STARTEN == */
-    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); //Color-Frame Buffer soll auf Hintergrundfarbe zurückgesetzt werden.
+    return [iboTris, iboLines];
 
+
+}
+/**
+ * Render triangles and lines from the given IBOs
+ */
+function render(gl, prog, iboTris, iboLines) {
     // Setup constant color.
     var colAttrib = gl.getAttribLocation(prog, 'col');
 
     // Triangles rendern
-    gl.vertexAttrib4f(colAttrib, 1, 0, 0, 1); //Füllfarbe
+    gl.vertexAttrib4f(colAttrib, 1, 0, 0, 1); //Setze col Attribut im Shader auf einen bestimmten Wert.
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
     gl.drawElements(gl.TRIANGLES, iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);  // Mit drawElements wird das gebundene IBO ausgelesen und der Rendervorgang gestartet.
 

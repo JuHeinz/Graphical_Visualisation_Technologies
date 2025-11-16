@@ -1,4 +1,4 @@
-var app = ( function() {
+var app = (function () {
 
 	var gl;
 
@@ -11,28 +11,28 @@ var app = ( function() {
 
 	var camera = {
 		// Initial position of the camera.
-		eye : [0, 1, 4],
+		eye: [0, 1, 4],
 		// Point to look at.
-		center : [0, 0, 0],
+		center: [0, 0, 0],
 		// Roll and pitch of the camera.
-		up : [0, 1, 0],
+		up: [0, 1, 0],
 		// Opening angle given in radian.
 		// radian = degree*2*PI/360.
-		fovy : 60.0 * Math.PI / 180,
+		fovy: 60.0 * Math.PI / 180,
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
-		lrtb : 2.0,
+		lrtb: 2.0,
 		// View matrix.
-		vMatrix : mat4.create(),
+		vMatrix: mat4.create(),
 		// Projection matrix.
-		pMatrix : mat4.create(),
+		pMatrix: mat4.create(),
 		// Projection types: ortho, perspective, frustum.
-		projectionType : "ortho",
+		projectionType: "ortho",
 		// Angle to Z-Axis for camera when orbiting the center
 		// given in radian.
-		zAngle : 0,
+		zAngle: 0,
 		// Distance in XZ-Plane from center when orbiting.
-		distance : 4,
+		distance: 4,
 	};
 
 	function start() {
@@ -49,8 +49,10 @@ var app = ( function() {
 		initPipline();
 	}
 
+	/**
+	 *  gl als globale Variable initialisieren. gl Objekt Attribute für die Höhe und Breite des Canvas geben. 
+	 */
 	function initWebGL() {
-		// Get canvas and WebGL context.
 		canvas = document.getElementById('canvas');
 		gl = canvas.getContext('experimental-webgl');
 		gl.viewportWidth = canvas.width;
@@ -85,6 +87,9 @@ var app = ( function() {
 		camera.aspect = gl.viewportWidth / gl.viewportHeight;
 	}
 
+	/**
+	 * Programm initialisieren.
+	 */
 	function initShaderProgram() {
 		// Init vertex shader.
 		var vs = initShader(gl.VERTEX_SHADER, "vertexshader");
@@ -102,22 +107,26 @@ var app = ( function() {
 	/**
 	 * Create and init shader from source.
 	 * 
-	 * @parameter shaderType: openGL shader type.
+	 * @parameter shaderType: openGL shader type. (gl.VERTEX_SHADER oder gl.FRAGMENT_SHADER)
 	 * @parameter SourceTagId: Id of HTML Tag with shader source.
 	 * @returns shader object.
 	 */
 	function initShader(shaderType, SourceTagId) {
-		var shader = gl.createShader(shaderType);
+		var shader = gl.createShader(shaderType); //Shader vom Typ gl.VERTEX_SHADER oder gl.FRAGMENT_SHADER erstellen 
 		var shaderSource = document.getElementById(SourceTagId).text;
 		gl.shaderSource(shader, shaderSource);
 		gl.compileShader(shader);
-		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			console.log(SourceTagId+": "+gl.getShaderInfoLog(shader));
+		// Falls ein Fehler aufgetreten ist, wird dieser mit den zugehörigen Logging-Infos auf der Konsole ausgegeben.
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			console.log(SourceTagId + ": " + gl.getShaderInfoLog(shader));
 			return null;
 		}
 		return shader;
 	}
 
+	/**
+	 * Die Projektions-Matrix und die Model-View-Matrix im Shader-Programm finden und dem js Object prog als Attribute hinzu
+	 */
 	function initUniforms() {
 		// Projection Matrix.
 		prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
@@ -138,7 +147,7 @@ var app = ( function() {
 	 * @parameter geometryname: string with name of geometry.
 	 * @parameter fillstyle: wireframe, fill, fillwireframe.
 	 */
- function createModel(geometryname, fillstyle) {
+	function createModel(geometryname, fillstyle) {
 		var model = {};
 		model.fillstyle = fillstyle;
 		initDataAndBuffers(model, geometryname);
@@ -196,14 +205,14 @@ var app = ( function() {
 
 	function initEventHandler() {
 
-		window.onkeydown = function(evt) {
+		window.onkeydown = function (evt) {
 			var key = evt.which ? evt.which : evt.keyCode;
 			var c = String.fromCharCode(key);
 			// console.log(evt);
 
 			// Change projection of scene.
-			switch(c) {
-				case('O'):
+			switch (c) {
+				case ('O'):
 					camera.projectionType = "ortho";
 					camera.lrtb = 2;
 					break;
@@ -221,27 +230,31 @@ var app = ( function() {
 		// Clear framebuffer and depth-/z-buffer.
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		setProjection();
+		setProjection(); //Kamera-Pojektion setzen.
 
+		/* Zunächst wird die View-Matrix mittels mat4.identity mit der Einheitsmatrix initialisiert,
+		 so dass ihre Anwendung auf einen Vertex nichts bewirkt */
 		mat4.identity(camera.vMatrix);
 
 		// Loop over models.
-		for(var i = 0; i < models.length; i++) {
+		// Jedem Model die view-Matrix aus der Kamera in sein Attribut mvMatrix rüber kopieren.
+		for (var i = 0; i < models.length; i++) {
 			// Update modelview for model.
 			mat4.copy(models[i].mvMatrix, camera.vMatrix);
 
 			// Set uniforms for model.
-			gl.uniformMatrix4fv(prog.mvMatrixUniform, false,
-				models[i].mvMatrix);
-			
+			// Fester Wert mvMatrix für Attribut mvMatrixUniform im Shader setzen.
+			gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix); //4fv == 4 x 4 Matrix aus Floating Point Werten
+
+			//Zeichnen der Modelle
 			draw(models[i]);
 		}
 	}
 
 	function setProjection() {
 		// Set projection Matrix.
-		switch(camera.projectionType) {
-			case("ortho"):
+		switch (camera.projectionType) {
+			case ("ortho"):
 				var v = camera.lrtb;
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
 				break;
@@ -253,15 +266,15 @@ var app = ( function() {
 	function draw(model) {
 		// Setup position VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
-		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,0,0);
+		gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false, 0, 0);
 
 		// Setup normal VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
-		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,0,0);
+		gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
 
 		// Setup rendering tris.
 		var fill = (model.fillstyle.search(/fill/) != -1);
-		if(fill) {
+		if (fill) {
 			gl.enableVertexAttribArray(prog.normalAttrib);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
 			gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements,
@@ -270,7 +283,7 @@ var app = ( function() {
 
 		// Setup rendering lines.
 		var wireframe = (model.fillstyle.search(/wireframe/) != -1);
-		if(wireframe) {
+		if (wireframe) {
 			gl.disableVertexAttribArray(prog.normalAttrib);
 			gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
@@ -281,7 +294,7 @@ var app = ( function() {
 
 	// App interface.
 	return {
-		start : start
+		start: start
 	}
 
 }());

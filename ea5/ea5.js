@@ -114,7 +114,10 @@ var app = (function () {
      * be in render function.
      */
     function initPipline() {
-        gl.clearColor(.95, .95, .95, 1);
+        var r = 151 / 255;
+        var g = 207 / 255
+        var b = 219 / 255
+        gl.clearColor(r, g, b, 1);
 
         // Backface culling.
         gl.frontFace(gl.CCW);
@@ -193,7 +196,7 @@ var app = (function () {
     function initModels() {
         // fill-style
         createModel("torus", "fillwireframe");
-        createModel("plane", "fillwireframe");
+        createModel("plane", "fill");
         createModel("sphere", "fillwireframe");
         createModel("recursivesphere", "fillwireframe");
         //createModel("triangle", "fillwireframe");
@@ -266,8 +269,7 @@ var app = (function () {
         // Setup triangle index buffer object.
         model.iboTris = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesTris,
-            gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesTris, gl.STATIC_DRAW);
         model.iboTris.numberOfElements = model.indicesTris.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }

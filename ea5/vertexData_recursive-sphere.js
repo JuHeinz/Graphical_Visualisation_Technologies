@@ -124,8 +124,8 @@ var recursivesphere = (function () {
         //console.log("Berechne Middlepoint ", key)
 
         if (middlePointCashe.has(key)) {
-            //console.log("Middlepoint schon berechnet")
-            //console.log(key)
+            console.log("Middlepoint schon berechnet")
+            console.log(key)
             //Return index of existing middle point
             return middlePointCashe.get(key);
         }

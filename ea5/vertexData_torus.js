@@ -32,8 +32,8 @@ var torus = (function () {
 				var iVertex = i * (m + 1) + j;
 
 				var x = (R + r * Math.cos(u)) * Math.cos(v) + 1.5;
-				var y = (R + r * Math.cos(u)) * Math.sin(v) + 0.8; //Um 0.8 nach oben verschieben.
-				var z = r * Math.sin(u);
+				var y = (R + r * Math.cos(u)) * Math.sin(v)
+				var z = r * Math.sin(u) + 2;
 
 				// Set vertex positions.
 				vertices[iVertex * 3] = x;

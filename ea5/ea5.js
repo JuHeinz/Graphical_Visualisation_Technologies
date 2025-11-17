@@ -10,6 +10,9 @@ var app = (function () {
     // Array of model objectst to render in this scene.
     var models = [];
 
+    var recursionLevel = 0;          // current recursion level for recursiveSphere
+    var maxRecursionLevel = 3;       // avoid explosion in vertex count
+
     var camera = {
         /** Position of the camera. */
         eye: [0, 1, 4],
@@ -63,6 +66,12 @@ var app = (function () {
     };
 
     function start() {
+        let decreaseRecBtn = document.getElementById('decreaseRecBtn');
+        let increaseRecBtn = document.getElementById('increaseRecBtn');
+
+        decreaseRecBtn.addEventListener("click", decreaseRecursionLevel)
+        increaseRecBtn.addEventListener("click", increaseRecursionLevel)
+
         init();
         render();
     }
@@ -86,6 +95,19 @@ var app = (function () {
         gl.viewportHeight = canvas.height;
     }
 
+    function decreaseRecursionLevel() {
+        if (recursionLevel > 0) {
+            recursionLevel--;
+            updateRecursiveSphereModel();
+        }
+    }
+
+    function increaseRecursionLevel() {
+        if (recursionLevel < maxRecursionLevel) {
+            recursionLevel++;
+            updateRecursiveSphereModel();
+        }
+    }
     /**
      * Init pipeline parameters that will not change again.
      * If projection or viewport change, their setup must
@@ -170,9 +192,9 @@ var app = (function () {
      */
     function initModels() {
         // fill-style
-        //createModel("torus", "fillwireframe");
-        //createModel("plane", "fillwireframe");
-        //createModel("sphere", "fillwireframe");
+        createModel("torus", "fillwireframe");
+        createModel("plane", "fillwireframe");
+        createModel("sphere", "fillwireframe");
         createModel("recursivesphere", "fillwireframe");
         //createModel("triangle", "fillwireframe");
 
@@ -187,6 +209,9 @@ var app = (function () {
     function createModel(geometryname, fillstyle) {
         var model = {};
         model.fillstyle = fillstyle;
+
+        model.geometry = geometryname; // store name so we can update it later
+
         initDataAndBuffers(model, geometryname);
         // Create and initialize Model-View-Matrix.
         model.mvMatrix = mat4.create();
@@ -206,7 +231,14 @@ var app = (function () {
         // Fill data arrays for Vertex-Positions, Normals, Index data:
         // vertices, normals, indicesLines, indicesTris;
         // Pointer this refers to the window.
-        this[geometryname]['createVertexData'].apply(model);
+        //this[geometryname]['createVertexData'].apply(model);
+
+        // use globalThis to access the module by name (e.g. recursivesphere)
+        if (globalThis[geometryname] && typeof globalThis[geometryname].createVertexData === "function") {
+            globalThis[geometryname].createVertexData.apply(model, [recursionLevel]);
+        } else {
+            throw new Error("Geometry module not found: " + geometryname);
+        }
 
         // Setup position vertex buffer object.
         model.vboPos = gl.createBuffer();
@@ -393,6 +425,18 @@ var app = (function () {
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
     }
 
+    function updateRecursiveSphereModel() {
+        console.log("Recursion level was updated: " + recursionLevel)
+        for (let i = 0; i < models.length; i++) {
+            let m = models[i];
+            if (m.geometry === "recursivesphere") {
+                // Re-create vertex/index data and re-upload buffers
+                initDataAndBuffers(m, m.geometry);
+                render();
+                break;
+            }
+        }
+    }
 
     // App interface.
     return {

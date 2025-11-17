@@ -1,11 +1,11 @@
 var recursivesphere = (function () {
     const tempVertArray = [];
-    let triIndTemp = [];
-    function createVertexData() {
-
+    function createVertexData(recursionLevel) {
         //VERTICES
         //Create 12 Vertices of an icosahedron
-        var t = (1.0 + Math.sqrt(5)) / 2.0;
+        var t = (1.0 + Math.sqrt(2)) / 2.0;
+        console.log(t)
+        let triIndTemp = [];
 
         tempVertArray.push([-1, t, 0]); //Vertex 0
         tempVertArray.push([1, t, 0]);
@@ -20,6 +20,7 @@ var recursivesphere = (function () {
         tempVertArray.push([-t, 0, -1]);
         tempVertArray.push([-t, 0, 1]); //Vertex 11
 
+        console.dir(tempVertArray)
         //TRI INDEX
         // create 20 triangles of the icosahedron
 
@@ -47,34 +48,37 @@ var recursivesphere = (function () {
         triIndTemp.push([8, 6, 7])
         triIndTemp.push([9, 8, 1])
 
-
         //REFINE TRIANGLES
+        for (i = 0; i < recursionLevel; i++) {
+            let triIndNew = []
+            for (tri of triIndTemp) {
 
-        let triIndNew = []
-        for (tri of triIndTemp) {
+                //Replace Triangle with 4 triangles
+                //a = Mittelpunkt zwischen Vertex 0 und Vertex 1
+                let a = getMiddlePoint(tri[0], tri[1]);
 
-            //Replace Triangle with 4 triangles
-            //a = Mittelpunkt zwischen Vertex 0 und Vertex 1
-            let a = getMiddlePoint(tri[0], tri[1]);
+                //b = Mittelpunkt zwischen Vertex 1 und Vertex 2
+                let b = getMiddlePoint(tri[1], tri[2]);
 
-            //b = Mittelpunkt zwischen Vertex 1 und Vertex 2
-            let b = getMiddlePoint(tri[1], tri[2]);
+                //c = Mittelpunkt zwischen Vertex 2 und Vertex 0
+                let c = getMiddlePoint(tri[2], tri[0]);
 
-            //c = Mittelpunkt zwischen Vertex 2 und Vertex 0
-            let c = getMiddlePoint(tri[2], tri[0]);
+                //Neue Dreiecke mit den errechneten Mittelpunkten bilden:
+                triIndNew.push([tri[0], a, c])
+                triIndNew.push([tri[1], b, a])
+                triIndNew.push([tri[2], c, b])
+                triIndNew.push([a, b, c])
+            }
 
-            //Neue Dreiecke mit den errechneten Mittelpunkten bilden:
-            triIndNew.push([tri[0], a, c])
-            triIndNew.push([tri[1], b, a])
-            triIndNew.push([tri[2], c, b])
-            triIndNew.push([a, b, c])
+            triIndTemp = triIndNew;
+            console.log("Tri Indices after recursion level " + i + ":")
+            console.dir(triIndTemp)
         }
 
-        triIndTemp = triIndNew;
-        console.dir(triIndTemp)
-        //Add triangles to mes
-
-
+        //Add triangles to mesh
+        console.log("______")
+        console.log("Vertices")
+        console.dir(tempVertArray)
         this.indicesTris = new Uint16Array(triIndTemp.flat());
         this.vertices = new Float32Array(tempVertArray.flat());
 
@@ -103,7 +107,6 @@ var recursivesphere = (function () {
         }
 
     }
-    let index = 0;
 
     let middlePointCashe = new Map();
     /**
@@ -167,13 +170,14 @@ var recursivesphere = (function () {
         let z = middlePoint[2];
         let length = Math.sqrt(x * x + y * y + z * z);
 
+
         let genormterMiddlePoint = [];
         genormterMiddlePoint[0] = (x / length);
         genormterMiddlePoint[1] = (y / length);
         genormterMiddlePoint[2] = (z / length);
 
-        tempVertArray.push(middlePoint)
-        return tempVertArray.indexOf(middlePoint)
+        tempVertArray.push(genormterMiddlePoint)
+        return tempVertArray.indexOf(genormterMiddlePoint)
     }
 
 

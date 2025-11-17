@@ -72,13 +72,12 @@ var triangle = (function () {
             const ny = v[1] / len;
             const nz = v[2] / len;
 
-            this.normals[i * 3] = nx;
-            this.normals[i * 3 + 1] = ny;
-            this.normals[i * 3 + 2] = nz;
+            this.normals[i * 3] = 1;
+            this.normals[i * 3 + 1] = 1;
+            this.normals[i * 3 + 2] = 1;
         }
 
     }
-    let index = 0;
 
     let middlePointCashe = new Map();
     /**
@@ -107,6 +106,7 @@ var triangle = (function () {
         //Hole die tatsächlichen x, y, z Koordinaten für den gegeben Index
         let vertex1 = tempVertArray[p1];
         let vertex2 = tempVertArray[p2];
+        console.log("====")
         console.log("Berechne Middlepoint zwischen #" + p1 + "(" + vertex1 + ")" + " und #" + p2 + "(" + vertex2 + ")" + " (" + key + ")")
 
         let x1 = vertex1[0];
@@ -126,7 +126,7 @@ var triangle = (function () {
 
         let indexOfMiddlePoint = addVertex(middlePoint)
         middlePointCashe.set(key, indexOfMiddlePoint)
-        console.log("Middlepoint is: (", middlePoint, ") with Index in Cache:" + indexOfMiddlePoint)
+        console.log("Middlepoint is: (", middlePoint, ") with Index:" + indexOfMiddlePoint)
 
         //Return index of created middle point
         //TODO: Dieser Index muss sich auf den Index in 
@@ -144,12 +144,13 @@ var triangle = (function () {
         let y = middlePoint[1];
         let z = middlePoint[2];
         let length = Math.sqrt(x * x + y * y + z * z);
+        console.log("length:", length)
 
         let genormterMiddlePoint = [];
         genormterMiddlePoint[0] = (x / length);
         genormterMiddlePoint[1] = (y / length);
         genormterMiddlePoint[2] = (z / length);
-
+        console.log("genormter Middle Point:" + genormterMiddlePoint)
         tempVertArray.push(middlePoint)
         return tempVertArray.indexOf(middlePoint)
     }

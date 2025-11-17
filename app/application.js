@@ -15,6 +15,7 @@ var app = (function () {
 		// Point to look at.
 		center: [0, 0, 0],
 		// Roll and pitch of the camera.
+		// Rotation um die Y Achse.
 		up: [0, 1, 0],
 		// Opening angle given in radian.
 		// radian = degree*2*PI/360.
@@ -22,8 +23,11 @@ var app = (function () {
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
 		lrtb: 2.0,
-		// View matrix.
+
+		/* View matrix: Is responsible for moving the objects in the scene to simulate the position of the camera being changed,
+		 altering what the viewer is currently able to see. */
 		vMatrix: mat4.create(),
+
 		// Projection matrix.
 		pMatrix: mat4.create(),
 		// Projection types: ortho, perspective, frustum.
@@ -206,16 +210,27 @@ var app = (function () {
 
 	function initEventHandler() {
 
+		// Rotation step.
+		var deltaRotate = Math.PI / 36;
+
+
 		window.onkeydown = function (evt) {
 			var key = evt.which ? evt.which : evt.keyCode;
 			var c = String.fromCharCode(key);
 			// console.log(evt);
+
+			// Use shift key to change sign.
+			var sign = evt.shiftKey ? -1 : 1;
 
 			// Change projection of scene.
 			switch (c) {
 				case ('O'):
 					camera.projectionType = "ortho";
 					camera.lrtb = 2;
+					break;
+				case ('C'):
+					// Orbit camera.
+					camera.zAngle += sign * deltaRotate;
 					break;
 			}
 
@@ -233,17 +248,19 @@ var app = (function () {
 
 		setProjection(); //Kamera-Pojektion setzen.
 
-		/* Zunächst wird die View-Matrix mittels mat4.identity mit der Einheitsmatrix initialisiert,
-		 so dass ihre Anwendung auf einen Vertex nichts bewirkt */
-		mat4.identity(camera.vMatrix);
 
+
+		calculateCameraOrbit()
+
+		// Set view matrix depending on camera attributes.
+		mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
 		// mat4.rotate = Rotieren einer 4x4 Matrix.
 		// 1. Parameter: Matrix, in der das berechnete Ergebnis gespeichert werden soll.
 		// 2. Parameter: Matrix, auf der die Berechnungen durchgeführt werden.
 		// 3. Parameter: Winkel, um den rotiert werden soll. (In Radiant gemessen)
 		// 4. Parameter: Die Achse, um die dreht werden soll. [1, 0, 0] -> X-Achse
-		mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * 1 / 4, [1, 1, 0]);
+		//mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * 1 / 4, [1, 1, 0]);
 
 
 		// Loop over models.
@@ -300,6 +317,20 @@ var app = (function () {
 			gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);
 		}
+	}
+
+	/**
+	 * Berechne den Eye-Vektor (die Kamera-Position) auf x,z Ebene
+	 */
+	function calculateCameraOrbit() {
+		//Die X- und Z-Komponenten beschreiben einen Kreis mit dem Winkel camera.zAngle und camera.distance als Radius.
+		var x = 0, z = 2;
+		camera.eye[x] = camera.center[x];
+		camera.eye[z] = camera.center[z];
+
+		//Entspricht der parametrischen Form des Kreises x = r * cos(t), y= r*sin(t)
+		camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
+		camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
 	}
 
 	// App interface.

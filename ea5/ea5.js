@@ -170,9 +170,9 @@ var app = (function () {
      */
     function initModels() {
         // fill-style
-        var fs = "fillwireframe";
-        createModel("torus", fs);
-        createModel("plane", "wireframe");
+        createModel("torus", "fillwireframe");
+        createModel("plane", "fillwireframe");
+        createModel("sphere", "fillwireframe");
 
     }
 

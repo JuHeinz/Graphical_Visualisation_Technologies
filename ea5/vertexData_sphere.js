@@ -30,7 +30,7 @@ var sphere = (function () {
 
                 var iVertex = i * (m + 1) + j;
 
-                var x = r * Math.sin(v) * Math.cos(u);
+                var x = r * Math.sin(v) * Math.cos(u) + 1.5;
                 var y = r * Math.sin(v) * Math.sin(u);
                 var z = r * Math.cos(v);
 

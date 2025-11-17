@@ -173,6 +173,7 @@ var app = (function () {
         createModel("torus", "fillwireframe");
         createModel("plane", "fillwireframe");
         createModel("sphere", "fillwireframe");
+        createModel("recursivesphere", "fillwireframe");
 
     }
 

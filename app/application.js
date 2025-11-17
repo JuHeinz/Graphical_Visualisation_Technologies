@@ -1,43 +1,64 @@
+//Diese Datei gibt ein Modul Names app zurück, auf dem nur die Methode start aufgerufen werden kann.
+
 var app = (function () {
 
 	var gl;
 
-	// The shader program object is also used to
-	// store attribute and uniform locations.
+	// The shader program object is also used to store attribute and uniform locations.
 	var prog;
 
-	// Array of model objects.
+	// Array of model objectst to render in this scene.
 	var models = [];
 
 	var camera = {
-		// Initial position of the camera.
+		/** Position of the camera. */
 		eye: [0, 1, 4],
-		// Point to look at.
+
+		/** Point to look at. */
 		center: [0, 0, 0],
-		// Roll and pitch of the camera.
-		// Rotation um die Y Achse.
+
+		/* Roll and pitch of the camera. Rotation um die Y Achse. */
 		up: [0, 1, 0],
 
-		// Öffnungswinkel. Wie viel die Kamera von Oben und Unten mitbekommt. Gemessen als Winkel der Y-Achse. Field Of View - Y
-		// radian = degree*2*PI/360.
+		/**  
+		 * Öffnungswinkel. Wie viel die Kamera von Oben und Unten mitbekommt. 
+		 * Gemessen als Winkel der Y-Achse -> Field Of View - Y
+		 * Angabe in Radian = degree*2*PI/360. 			
+		*/
 		fovy: 60.0 * Math.PI / 180,
 
-		// Camera near plane dimensions:
-		// value for left right top bottom in projection.
+		/**  
+		 * Camera near plane dimensions:
+		 * value for left right top bottom in projection. */
 		lrtb: 2.0,
 
-		/* View matrix: Is responsible for moving the objects in the scene to simulate the position of the camera being changed,
-		 altering what the viewer is currently able to see. */
+		/**
+		 *  View matrix:
+		 *  Is responsible for moving the objects in the scene to simulate the position of the camera being changed,
+		 * altering what the viewer is currently able to see. 
+		 * */
 		vMatrix: mat4.create(),
 
-		// Projection matrix: Kamera-Perspektive, Orthogonal oder perspektivisch.
+		/** 
+		 * Projection matrix: Speichert die Kamera Projection.
+		 * Wird modifiziert in setProjection()
+		 */
 		pMatrix: mat4.create(),
-		// Projection types: ortho, perspective, frustum.
+
+		/** 
+		 *  Projection types: ortho, perspective, frustum.
+		 * 	Kann durch setProjection() geändert werden.
+		 * */
 		projectionType: "perspective",
-		// Angle to Z-Axis for camera when orbiting the center
-		// given in radian.
+
+		/**  
+		 * In welchem Winkel die Kamera zur Z-Achse steht. Hiermit kann man um das Zentrum rotieren.
+		 * 	Angabe in Radian.
+		 * Wird bei User Input modifiziert. (camera.zAngle += sign * deltaRotate;) siehe initEnventHandler.
+		*/
 		zAngle: 0,
-		// Distance in XZ-Plane from center when orbiting.
+
+		/**  Distance in XZ-Plane from center when orbiting. */
 		distance: 4,
 	};
 
@@ -144,6 +165,9 @@ var app = (function () {
 		prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
 	}
 
+	/**
+	 * Definieren, welche Models mit welchem Stil gerendert werden sollen.
+	 */
 	function initModels() {
 		// fill-style
 		var fs = "fillwireframe";
@@ -169,6 +193,7 @@ var app = (function () {
 	}
 
 	/**
+	 * Zu einemn Model die Buffer und Vertex, Index und Normal Arrays erstellen. 
 	 * Init data and buffers for model object.
 	 * 
 	 * @parameter model: a model object to augment with data.
@@ -213,6 +238,9 @@ var app = (function () {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 	}
 
+	/**
+	 * Handle User Inputs. Trigger re-rendering of the scene.
+	 */
 	function initEventHandler() {
 
 		// Rotation step.
@@ -224,7 +252,7 @@ var app = (function () {
 			var c = String.fromCharCode(key);
 			// console.log(evt);
 
-			// Use shift key to change sign.
+			// Use shift key to change sign: Bestimmt in Welche Richtung rotiert wird.
 			var sign = evt.shiftKey ? -1 : 1;
 
 			// Change projection of scene.
@@ -258,21 +286,12 @@ var app = (function () {
 		// Clear framebuffer and depth-/z-buffer.
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		setProjection(); //Kamera-Pojektion setzen.
+		setProjection(); //Kamera-Pojektion ggf neu setzen, z.B. wenn nach einem User Input neu gerendert werden soll. 
 
-
-
-		calculateCameraOrbit()
+		calculateCameraOrbit() //Camera.eye ggf. neu berechnen. z.B. wenn nach einem User Input neu gerendert werden soll. 
 
 		// Set view matrix depending on camera attributes.
 		mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
-
-		// mat4.rotate = Rotieren einer 4x4 Matrix.
-		// 1. Parameter: Matrix, in der das berechnete Ergebnis gespeichert werden soll.
-		// 2. Parameter: Matrix, auf der die Berechnungen durchgeführt werden.
-		// 3. Parameter: Winkel, um den rotiert werden soll. (In Radiant gemessen)
-		// 4. Parameter: Die Achse, um die dreht werden soll. [1, 0, 0] -> X-Achse
-		//mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * 1 / 4, [1, 1, 0]);
 
 
 		// Loop over models.
@@ -292,6 +311,7 @@ var app = (function () {
 
 	/**
 	 * Set projection Matrix.
+	 * Zuerst in camera.pMatrix, dann im Programm. 
 	 */
 	function setProjection() {
 		switch (camera.projectionType) {
@@ -312,11 +332,10 @@ var app = (function () {
 				mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, 10);
 				break;
 			case ("perspective"):
-				mat4.perspective(camera.pMatrix, camera.fovy,
-					camera.aspect, 1, 10);
+				mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 10);
 				break;
 		}
-		// Set projection uniform.
+		// Set projection im Programm.
 		gl.uniformMatrix4fv(prog.pMatrixUniform, false, camera.pMatrix);
 	}
 

@@ -37,22 +37,29 @@
 
         <main class="d-flex flex-column gap-2">
             <!--AUFGABE-->
+            <p>Kamera-Projektionen:</p>
+            <ul>
+                <li>p: Perspective</li>
+                <li>o: Orthogonal</li>
+                <li>f: Frustum</li>
+            </ul>
+            <p>Kamera-Bewegung:</p>
+            <ul>
+                <li>C: Orbit</li>
+                <li>Shift + C: Orbit Richtung ändern</li>
+            </ul>
             <section id="part-1">
                 <h3>Teil 1 - Zwei Grundkörper</h3>
 
                 <canvas id="canvas1"></canvas>
                 <div class="code-segment">
-                    <code>x = f(u,v) = cos(u)</code>
-                    <code>y = g(u,v) = 0.5 * sin(u) * sin(v) </code>
-                    <code>z = h(u,v) = cos(v)</code>
+
                 </div>
 
                 <h3>Teil 2</h3>
                 <canvas id="canvas2"></canvas>
                 <div class="code-segment">
-                    <code>x = f(u,v) = (1 + u * cos(v)) * sin(π * u);</code>
-                    <code>y = g(u,v) = (1 + u * cos(v)) * cos(π * u) + u; </code>
-                    <code>z = h(u,v) = u * sin(v)</code>
+
                 </div>
             </section>
 

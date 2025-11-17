@@ -170,9 +170,9 @@ var app = (function () {
      */
     function initModels() {
         // fill-style
-        createModel("torus", "fillwireframe");
-        createModel("plane", "fillwireframe");
-        createModel("sphere", "fillwireframe");
+        //createModel("torus", "fillwireframe");
+        //createModel("plane", "fillwireframe");
+        //createModel("sphere", "fillwireframe");
         createModel("recursivesphere", "fillwireframe");
 
     }
@@ -391,6 +391,7 @@ var app = (function () {
         camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
     }
+
 
     // App interface.
     return {

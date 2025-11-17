@@ -4,7 +4,6 @@ var recursivesphere = (function () {
         //VERTICES
         //Create 12 Vertices of an icosahedron
         var t = (1.0 + Math.sqrt(2)) / 2.0;
-        console.log(t)
         let triIndTemp = [];
 
         tempVertArray.push([-1, t, 0]); //Vertex 0
@@ -20,7 +19,6 @@ var recursivesphere = (function () {
         tempVertArray.push([-t, 0, -1]);
         tempVertArray.push([-t, 0, 1]); //Vertex 11
 
-        console.dir(tempVertArray)
         //TRI INDEX
         // create 20 triangles of the icosahedron
 
@@ -71,14 +69,14 @@ var recursivesphere = (function () {
             }
 
             triIndTemp = triIndNew;
-            console.log("Tri Indices after recursion level " + i + ":")
+            console.log("Tri Indices after rec " + (i + 1) + ":")
             console.dir(triIndTemp)
+            console.log("Vertices after rec " + (i + 1) + ":")
+            console.dir(tempVertArray)
         }
 
         //Add triangles to mesh
-        console.log("______")
-        console.log("Vertices")
-        console.dir(tempVertArray)
+
         this.indicesTris = new Uint16Array(triIndTemp.flat());
         this.vertices = new Float32Array(tempVertArray.flat());
 
@@ -124,8 +122,6 @@ var recursivesphere = (function () {
         //console.log("Berechne Middlepoint ", key)
 
         if (middlePointCashe.has(key)) {
-            console.log("Middlepoint schon berechnet")
-            console.log(key)
             //Return index of existing middle point
             return middlePointCashe.get(key);
         }

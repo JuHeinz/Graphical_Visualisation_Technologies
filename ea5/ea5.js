@@ -246,8 +246,12 @@ var app = (function () {
         // Rotation step.
         var deltaRotate = Math.PI / 36;
 
+        //Zomm step
+        var deltaDistance = 0.1
+
 
         window.onkeydown = function (evt) {
+
             var key = evt.which ? evt.which : evt.keyCode;
             var c = String.fromCharCode(key);
             // console.log(evt);
@@ -256,20 +260,25 @@ var app = (function () {
             var sign = evt.shiftKey ? -1 : 1;
 
             // Change projection of scene.
-            switch (c) {
-                case ('O'):
+            switch (evt.code) {
+                case ("ArrowLeft"): // Orbit Model CCW.
+                    camera.zAngle += -1 * deltaRotate;
+                    break;
+                case ("ArrowRight"):  // Orbit Model CW;
+                    camera.zAngle += 1 * deltaRotate;
+                    break;
+                case ('KeyN'): //Orbit Distanz erhöhen/verringern
+                    camera.distance += sign * deltaDistance;
+                    break;
+                case ('KeyO'):
                     camera.projectionType = "ortho";
                     camera.lrtb = 2;
                     break;
-                case ('C'):
-                    // Orbit camera.
-                    camera.zAngle += sign * deltaRotate;
-                    break;
-                case ('F'):
+                case ('KeyF'):
                     camera.projectionType = "frustum";
                     camera.lrtb = 1.2;
                     break;
-                case ('P'):
+                case ('KeyP'):
                     camera.projectionType = "perspective";
                     break;
             }

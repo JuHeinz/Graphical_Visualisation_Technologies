@@ -1,67 +1,40 @@
-var recursivesphere = (function () {
+var triangle = (function () {
     const tempVertArray = [];
-    let triIndTemp = [];
+    let triangleIndexArray = [];
     function createVertexData() {
 
         //VERTICES
-        //Create 12 Vertices of an icosahedron
+        //Create 3 Vertices of a triangle
         var t = (1.0 + Math.sqrt(5)) / 2.0;
 
-        tempVertArray.push([-1, t, 0]); //Vertex 0
-        tempVertArray.push([1, t, 0]);
-        tempVertArray.push([-1, -t, 0]);
-        tempVertArray.push([1, -t, 0]);
-        tempVertArray.push([0, -1, t]);
-        tempVertArray.push([0, 1, t]);
-        tempVertArray.push([0, -1, -t]);
-        tempVertArray.push([0, 1, -t]);
-        tempVertArray.push([t, 0, -1]);
-        tempVertArray.push([t, 0, 1]);
-        tempVertArray.push([-t, 0, -1]);
-        tempVertArray.push([-t, 0, 1]); //Vertex 11
+        tempVertArray.push([-1, 1.6, 0]); //Vertex 0
+        tempVertArray.push([1, 1.6, 0]);
+        tempVertArray.push([-1, -1.6, 0]);
+
 
         //TRI INDEX
         // create 20 triangles of the icosahedron
 
-        triIndTemp.push([0, 11, 5])
-        triIndTemp.push([0, 5, 1])
-        triIndTemp.push([0, 1, 7])
-        triIndTemp.push([0, 7, 10])
-        triIndTemp.push([0, 10, 11])
-
-        triIndTemp.push([1, 5, 9])
-        triIndTemp.push([5, 11, 4])
-        triIndTemp.push([11, 10, 2])
-        triIndTemp.push([10, 7, 6])
-        triIndTemp.push([7, 1, 8])
-
-        triIndTemp.push([3, 9, 4])
-        triIndTemp.push([3, 4, 2])
-        triIndTemp.push([3, 2, 6])
-        triIndTemp.push([3, 6, 8])
-        triIndTemp.push([3, 8, 9])
-
-        triIndTemp.push([4, 9, 5])
-        triIndTemp.push([2, 4, 11])
-        triIndTemp.push([6, 2, 10])
-        triIndTemp.push([8, 6, 7])
-        triIndTemp.push([9, 8, 1])
+        triangleIndexArray.push([0, 1, 2])
 
 
         //REFINE TRIANGLES
 
         let triIndNew = []
-        for (tri of triIndTemp) {
+        for (tri of triangleIndexArray) {
 
             //Replace Triangle with 4 triangles
             //a = Mittelpunkt zwischen Vertex 0 und Vertex 1
             let a = getMiddlePoint(tri[0], tri[1]);
+            console.log("Mittelpunkt zwischen", tri[0], tri[1], "ist", a)
 
             //b = Mittelpunkt zwischen Vertex 1 und Vertex 2
             let b = getMiddlePoint(tri[1], tri[2]);
+            console.log("Mittelpunkt zwischen", tri[1], tri[2], "ist", b)
 
             //c = Mittelpunkt zwischen Vertex 2 und Vertex 0
             let c = getMiddlePoint(tri[2], tri[0]);
+            console.log("Mittelpunkt zwischen", tri[2], tri[0], "ist", c)
 
             //Neue Dreiecke mit den errechneten Mittelpunkten bilden:
             triIndNew.push([tri[0], a, c])
@@ -70,17 +43,19 @@ var recursivesphere = (function () {
             triIndNew.push([a, b, c])
         }
 
-        triIndTemp = triIndNew;
-        console.dir(triIndTemp)
-        //Add triangles to mes
+        triangleIndexArray = triIndNew;
+        console.log("Triangle index new:")
+        console.dir(triangleIndexArray)
 
+        console.log("Vertices new:")
+        console.dir(tempVertArray)
 
-        this.indicesTris = new Uint16Array(triIndTemp.flat());
+        this.indicesTris = new Uint16Array(triangleIndexArray.flat());
         this.vertices = new Float32Array(tempVertArray.flat());
 
         // LINE INDICES
         const tempLineArray = [];
-        for (let tri of triIndTemp) {
+        for (let tri of triangleIndexArray) {
             tempLineArray.push(tri[0], tri[1]);
             tempLineArray.push(tri[1], tri[2]);
             tempLineArray.push(tri[2], tri[0]);
@@ -118,19 +93,21 @@ var recursivesphere = (function () {
         let smallerIndex = firstIsSmaller ? p1 : p2;
         let greaterIndex = firstIsSmaller ? p2 : p1;
         const key = `${smallerIndex},${greaterIndex}`; //Create a key that shows for which two points we want to create the middle point. 
-        //console.log("Berechne Middlepoint ", key)
+
 
         if (middlePointCashe.has(key)) {
-            //console.log("Middlepoint schon berechnet")
-            //console.log(key)
+            console.log("Middlepoint schon berechnet")
+            console.log(key)
             //Return index of existing middle point
             return middlePointCashe.get(key);
         }
+
 
         //Mittelpunkt noch nicht im Cache, also berechnen:
         //Hole die tatsächlichen x, y, z Koordinaten für den gegeben Index
         let vertex1 = tempVertArray[p1];
         let vertex2 = tempVertArray[p2];
+        console.log("Berechne Middlepoint zwischen #" + p1 + "(" + vertex1 + ")" + " und #" + p2 + "(" + vertex2 + ")" + " (" + key + ")")
 
         let x1 = vertex1[0];
         let y1 = vertex1[1];
@@ -147,11 +124,12 @@ var recursivesphere = (function () {
         middlePoint[1] = ((y1 + y2) / 2.0);
         middlePoint[2] = ((z1 + z2) / 2.0);
 
-
         let indexOfMiddlePoint = addVertex(middlePoint)
         middlePointCashe.set(key, indexOfMiddlePoint)
+        console.log("Middlepoint is: (", middlePoint, ") with Index in Cache:" + indexOfMiddlePoint)
 
         //Return index of created middle point
+        //TODO: Dieser Index muss sich auf den Index in 
         return indexOfMiddlePoint
     }
 

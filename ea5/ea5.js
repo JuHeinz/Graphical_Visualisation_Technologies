@@ -174,6 +174,7 @@ var app = (function () {
         //createModel("plane", "fillwireframe");
         //createModel("sphere", "fillwireframe");
         createModel("recursivesphere", "fillwireframe");
+        //createModel("triangle", "fillwireframe");
 
     }
 

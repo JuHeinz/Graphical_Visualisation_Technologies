@@ -17,9 +17,11 @@ var app = (function () {
 		// Roll and pitch of the camera.
 		// Rotation um die Y Achse.
 		up: [0, 1, 0],
-		// Opening angle given in radian.
+
+		// Öffnungswinkel. Wie viel die Kamera von Oben und Unten mitbekommt. Gemessen als Winkel der Y-Achse. Field Of View - Y
 		// radian = degree*2*PI/360.
 		fovy: 60.0 * Math.PI / 180,
+
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
 		lrtb: 2.0,
@@ -28,10 +30,10 @@ var app = (function () {
 		 altering what the viewer is currently able to see. */
 		vMatrix: mat4.create(),
 
-		// Projection matrix.
+		// Projection matrix: Kamera-Perspektive, Orthogonal oder perspektivisch.
 		pMatrix: mat4.create(),
 		// Projection types: ortho, perspective, frustum.
-		projectionType: "ortho",
+		projectionType: "perspective",
 		// Angle to Z-Axis for camera when orbiting the center
 		// given in radian.
 		zAngle: 0,
@@ -129,13 +131,16 @@ var app = (function () {
 	}
 
 	/**
-	 * Die Projektions-Matrix und die Model-View-Matrix im Shader-Programm finden und dem js Object prog als Attribute hinzu
+	 * Die uniformen Projektions-Matrix und die Model-View-Matrix im Shader-Programm finden und dem js Object prog als Attribute hinzufügen.
+	 * uniform -> Alle Vertices / Fragments werden mit den gleichen Werten bearbeitet, read-only. Ändert sich nicht von Vertex zu Vertex. 
 	 */
 	function initUniforms() {
 		// Projection Matrix.
+		// Bestimmt die Kamera-Projektion
 		prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
 
-		// Model-View-Matrix.
+		// Model-View-Matrix
+		// Bestimmt die Kamera-Position, bzw die Modell-Position.
 		prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
 	}
 
@@ -232,6 +237,13 @@ var app = (function () {
 					// Orbit camera.
 					camera.zAngle += sign * deltaRotate;
 					break;
+				case ('F'):
+					camera.projectionType = "frustum";
+					camera.lrtb = 1.2;
+					break;
+				case ('P'):
+					camera.projectionType = "perspective";
+					break;
 			}
 
 			// Render the scene again on any key pressed.
@@ -278,12 +290,30 @@ var app = (function () {
 		}
 	}
 
+	/**
+	 * Set projection Matrix.
+	 */
 	function setProjection() {
-		// Set projection Matrix.
 		switch (camera.projectionType) {
-			case ("ortho"):
-				var v = camera.lrtb;
+			case ("ortho"): //Orthogonal
+				var v = camera.lrtb; //Hier ist die left, right, top, bottom Begrenzung der Near Clipping Plane gespeichert.
+
+				//Dem Attribut camera.pMatrix eine Orthogonale Matrix geben
+				/* Parameter:
+					1. out: Die Matrix, in der das Berechnungsergebnis gespeichert werden soll
+					2. left,3. right,4. bottom,	5. top: Begrenzung der Near-Clipping-Plane relativ zur Z-Achse an
+					6. near: Abstand der Near Clipping-Plane zum Ursprung, also Z-Wert
+					7. far: Abstand der Far Clipping-Plane zum Ursprung, also Z-Wert
+				*/
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
+				break;
+			case ("frustum"):
+				var v = camera.lrtb;
+				mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, 10);
+				break;
+			case ("perspective"):
+				mat4.perspective(camera.pMatrix, camera.fovy,
+					camera.aspect, 1, 10);
 				break;
 		}
 		// Set projection uniform.

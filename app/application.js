@@ -139,6 +139,8 @@ var app = (function () {
 		// fill-style
 		var fs = "fillwireframe";
 		createModel("torus", fs);
+		createModel("plane", "wireframe");
+
 	}
 
 	/**
@@ -189,8 +191,7 @@ var app = (function () {
 		// Setup lines index buffer object.
 		model.iboLines = gl.createBuffer();
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesLines,
-			gl.STATIC_DRAW);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesLines, gl.STATIC_DRAW);
 		model.iboLines.numberOfElements = model.indicesLines.length;
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
@@ -235,6 +236,15 @@ var app = (function () {
 		/* Zunächst wird die View-Matrix mittels mat4.identity mit der Einheitsmatrix initialisiert,
 		 so dass ihre Anwendung auf einen Vertex nichts bewirkt */
 		mat4.identity(camera.vMatrix);
+
+
+		// mat4.rotate = Rotieren einer 4x4 Matrix.
+		// 1. Parameter: Matrix, in der das berechnete Ergebnis gespeichert werden soll.
+		// 2. Parameter: Matrix, auf der die Berechnungen durchgeführt werden.
+		// 3. Parameter: Winkel, um den rotiert werden soll. (In Radiant gemessen)
+		// 4. Parameter: Die Achse, um die dreht werden soll. [1, 0, 0] -> X-Achse
+		mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * 1 / 4, [1, 1, 0]);
+
 
 		// Loop over models.
 		// Jedem Model die view-Matrix aus der Kamera in sein Attribut mvMatrix rüber kopieren.

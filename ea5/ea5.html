@@ -10,9 +10,42 @@
             integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
         <link rel="stylesheet" href="../styles.css">
         <link rel="stylesheet" href="./ea5.css">
+        <script src="../ext/gl-matrix.js"></script>
+        <script src="vertexData_torus.js"></script>
+        <script src="vertexData_plane.js"></script>
+        <script src="./ea5.js"></script>
+
+        <!--VERTEX SHADER-->
+        <script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+	
+				vColor = vec4(aNormal.x, aNormal.y, aNormal.z, 1.0);
+				vColor = (vColor + 1.0) / 2.0;
+			}
+		</script>
+
+        <!--FRAGMENT SHADER-->
+        <script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+
     </head>
 
-    <body>
+    <body onload="app.start()">
 
         <header>
             <nav class="navbar navbar-expand-lg bg-body-tertiary" id="global-nav">
@@ -37,30 +70,23 @@
 
         <main class="d-flex flex-column gap-2">
             <!--AUFGABE-->
-            <p>Kamera-Projektionen:</p>
-            <ul>
-                <li>p: Perspective</li>
-                <li>o: Orthogonal</li>
-                <li>f: Frustum</li>
-            </ul>
-            <p>Kamera-Bewegung:</p>
-            <ul>
-                <li>C: Orbit</li>
-                <li>Shift + C: Orbit Richtung ändern</li>
-            </ul>
+
             <section id="part-1">
-                <h3>Teil 1 - Zwei Grundkörper</h3>
-
-                <canvas id="canvas1"></canvas>
+                <canvas id="canvas" width="500px" height="500px"></canvas>
                 <div class="code-segment">
-
+                    <p>Kamera-Projektionen:</p>
+                    <ul>
+                        <li>p: Perspective</li>
+                        <li>o: Orthogonal</li>
+                        <li>f: Frustum</li>
+                    </ul>
+                    <p>Kamera-Bewegung:</p>
+                    <ul>
+                        <li>c: Orbit</li>
+                        <li>Shift + c: Orbit Richtung ändern</li>
+                    </ul>
                 </div>
 
-                <h3>Teil 2</h3>
-                <canvas id="canvas2"></canvas>
-                <div class="code-segment">
-
-                </div>
             </section>
 
         </main>
@@ -71,9 +97,6 @@
             <p class="text-body-secondary"> <a
                     href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Gitub Repository</a></p>
         </footer>
-
-        <script src="./createVertexData.js"></script>
-        <script src="./ea5.js"></script>
 
     </body>
 

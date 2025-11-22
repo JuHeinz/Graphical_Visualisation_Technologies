@@ -13,9 +13,6 @@ var app = (function () {
     // Model that is target for user input.
     var interactiveModel;
 
-    var recursionLevel = 0;          // current recursion level for recursiveSphere
-    var maxRecursionLevel = 3;       // avoid explosion in vertex count
-
     var camera = {
         /** Position of the camera. */
         eye: [0, 1, 4],
@@ -47,20 +44,17 @@ var app = (function () {
 
         /** 
          * Projection matrix: Speichert die Kamera Projection.
-         * Wird modifiziert in setProjection()
          */
         pMatrix: mat4.create(),
 
         /** 
          *  Projection types: ortho, perspective, frustum.
-         * 	Kann durch setProjection() geändert werden.
          * */
         projectionType: "perspective",
 
         /**  
          * In welchem Winkel die Kamera zur Z-Achse steht. Hiermit kann man um das Zentrum rotieren.
-         * 	Angabe in Radian.
-         * Wird bei User Input modifiziert. (camera.zAngle += sign * deltaRotate;) siehe initEnventHandler.
+         * Angabe in Radian.
         */
         zAngle: 0,
 
@@ -82,7 +76,9 @@ var app = (function () {
         initEventHandler();
         initPipline();
     }
-
+    /**
+     * Buttons und deren clickListener festlegen. 
+     */
     function initHTML() {
         // CAMERA
         // Camera Rotation
@@ -289,23 +285,14 @@ var app = (function () {
     }
 
     /**
-     * Zu einemn Model die Buffer und Vertex, Index und Normal Arrays erstellen.      * 
+     * Zu einemn Model die Buffer und Vertex, Index und Normal Arrays erstellen. 
      * @parameter model: a model object to augment with data.
      * @parameter geometryname: string with name of geometry.
      */
     function initDataAndBuffers(model, geometryname) {
-        // Provide model object with vertex data arrays.
-        // Fill data arrays for Vertex-Positions, Normals, Index data:
-        // vertices, normals, indicesLines, indicesTris;
-        // Pointer this refers to the window.
-        //this[geometryname]['createVertexData'].apply(model);
+        //Dem Model die vertices, indexes und normals geben, durch Aufruf der Funktion createVertexData
+        globalThis[geometryname].createVertexData.apply(model);
 
-        // use globalThis to access the module by name (e.g. recursivesphere)
-        if (globalThis[geometryname] && typeof globalThis[geometryname].createVertexData === "function") {
-            globalThis[geometryname].createVertexData.apply(model, [recursionLevel]);
-        } else {
-            throw new Error("Geometry module not found: " + geometryname);
-        }
 
         // Setup position vertex buffer object.
         model.vboPos = gl.createBuffer();
@@ -397,10 +384,11 @@ var app = (function () {
             }
         };
     }
+
     /**
      * Rotiere das Modell um eine gegebene Achse.
      * @param {*} axis 0 = x, 1= y, 2 = z
-     * @param {*} sign 
+     * @param {*} sign 1 oder -1
      */
     function rotateModel(axis, sign) {
         var deltaRotate = Math.PI / 36;
@@ -409,13 +397,16 @@ var app = (function () {
         render();
     }
 
+    /**
+     * Rotatations, Translations und Skalierungs-Matrix des Models auf Default zurücksetzen. 
+     */
     function resetModel() {
         interactiveModel.rotate = [0, 0, 0];
         render()
     }
 
     /**
-     * 
+     * Kamera rotieren. Winkel, in dem die Kamera zur Z-Achse steht ändern. 
      * @param {} sign -1 = CW, 1 = CCW
      */
     function orbitCam(sign) {
@@ -434,7 +425,7 @@ var app = (function () {
     }
 
     /**
-     * 
+     * Höhe der Kamera ändern. 
      * @param {*} sign  -1 = Down, 1 = up
      */
     function moveCamUpDown(sign) {
@@ -443,12 +434,20 @@ var app = (function () {
         render()
     }
 
+    /**
+     * Kamera-Projektion ändern.
+     * @param {*} projectionType 
+     * @param {*} lrtb 
+     */
     function updateProjection(projectionType, lrtb) {
         camera.projectionType = projectionType;
         camera.lrtb = lrtb;
         render();
     }
 
+    /**
+     * Kamera Projektion, Höhe, Winkel zur Z-Achse und Entfernung zum Zentrum zurücksetzen.
+     */
     function resetCamera() {
         camera.projectionType = "perspective";
         camera.lrtb = 2;
@@ -586,19 +585,6 @@ var app = (function () {
         //Entspricht der parametrischen Form des Kreises x = r * cos(t), y= r*sin(t)
         camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
-    }
-
-    function updateRecursiveSphereModel() {
-        console.log("Recursion level was updated: " + recursionLevel)
-        for (let i = 0; i < models.length; i++) {
-            let m = models[i];
-            if (m.geometry === "recursivesphere") {
-                // Re-create vertex/index data and re-upload buffers
-                initDataAndBuffers(m, m.geometry);
-                render();
-                break;
-            }
-        }
     }
 
     // App interface.

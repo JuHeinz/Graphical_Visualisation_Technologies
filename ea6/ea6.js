@@ -127,7 +127,15 @@ var app = (function () {
         btnRotateY.addEventListener("click", () => rotateModel(1, 1))
         btnRotateZ.addEventListener("click", () => rotateModel(2, 1))
 
-        // Model rest
+        //Scale
+        let btnScaleUp = document.getElementById('btn-scaleUp');
+        let btnScaleDown = document.getElementById('btn-scaleDown');
+        btnScaleUp.addEventListener("click", () => scaleModel(1))
+        btnScaleDown.addEventListener("click", () => scaleModel(-1))
+
+
+
+        // Model reset
         let btnResetModel = document.getElementById('btn-resetModel');
         btnResetModel.addEventListener("click", () => resetModel());
 
@@ -397,11 +405,20 @@ var app = (function () {
         render();
     }
 
+    function scaleModel(sign) {
+        var deltaScale = 0.05;
+        interactiveModel.scale[0] *= 1 + sign * deltaScale
+        interactiveModel.scale[1] *= 1 + sign * deltaScale
+        interactiveModel.scale[2] *= 1 + sign * deltaScale
+        render()
+    }
+
     /**
      * Rotatations, Translations und Skalierungs-Matrix des Models auf Default zurücksetzen. 
      */
     function resetModel() {
         interactiveModel.rotate = [0, 0, 0];
+        interactiveModel.scale = [1, 1, 1];
         render()
     }
 

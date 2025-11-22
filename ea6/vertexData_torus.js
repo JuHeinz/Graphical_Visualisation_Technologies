@@ -31,8 +31,8 @@ var torus = (function () {
 
 				var iVertex = i * (m + 1) + j;
 
-				var x = (R + r * Math.cos(u)) * Math.cos(v) + 1.5;
-				var y = (R + r * Math.cos(u)) * Math.sin(v)
+				var x = (R + r * Math.cos(u)) * Math.cos(v);
+				var y = (R + r * Math.cos(u)) * Math.sin(v);
 				var z = r * Math.sin(u) + 2;
 
 				// Set vertex positions.
@@ -47,10 +47,6 @@ var torus = (function () {
 				normals[iVertex * 3] = nx;
 				normals[iVertex * 3 + 1] = ny;
 				normals[iVertex * 3 + 2] = nz;
-
-				// if(i>14){
-				// continue;
-				// }
 
 				// Set index.
 				// Line on beam.

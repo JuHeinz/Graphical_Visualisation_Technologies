@@ -99,8 +99,8 @@ var app = (function () {
         let closerBtn = document.getElementById('btn-closer');
         let furthernDown = document.getElementById('btn-further');
 
-        closerBtn.addEventListener("click", () => zoomCam(-1));
-        furthernDown.addEventListener("click", () => zoomCam(1));
+        closerBtn.addEventListener("click", () => moveCamCloser(-1));
+        furthernDown.addEventListener("click", () => moveCamCloser(1));
 
         //PROJECTION
         let btnPerspective = document.getElementById('btn-perspective');
@@ -228,9 +228,8 @@ var app = (function () {
     function initModels() {
         // fill-style
         createModel("torus", "fillwireframe");
-        createModel("plane", "fill");
+        createModel("plane", "wireframe");
         createModel("sphere", "fillwireframe");
-        createModel("recursivesphere", "fillwireframe");
         //createModel("triangle", "fillwireframe");
 
     }
@@ -329,7 +328,7 @@ var app = (function () {
                     orbitCam(1)
                     break;
                 case ('KeyN'): //Orbit Distanz erhöhen/verringern
-                    zoomCam(sign);
+                    moveCamCloser(sign);
                     break;
                 case ("ArrowUp"):
                     moveCamUpDown(-1)
@@ -367,10 +366,10 @@ var app = (function () {
         render()
     }
     /**
-     * 
+     * Kamera heranfahren: Kamera-Entfernung zum Zentrum 
      * @param {*} sign -1 = Closer, 1= Further
      */
-    function zoomCam(sign) {
+    function moveCamCloser(sign) {
         var delta = 0.1 //Zoom step
         camera.distance += sign * delta;
         render()

@@ -146,9 +146,9 @@ var app = (function () {
      * be in render function.
      */
     function initPipline() {
-        var r = 151 / 255;
-        var g = 207 / 255
-        var b = 219 / 255
+        var r = 52 / 255;
+        var g = 56 / 255
+        var b = 59 / 255
         gl.clearColor(r, g, b, 1);
 
         // Backface culling.

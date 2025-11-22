@@ -2,9 +2,11 @@
     --primary: #2b7abf;
     --secondary: #0f477b;
     --text: #e7edf3;
-    --background: #ffffff16;
+    --background: rgb(52, 56, 59);
     --border-radius: 10px;
     --dark-grey: rgb(43, 48, 53);
+    --bootstrap-background: rgb(33, 37, 41);
+    /* just for reference */
 }
 
 .title-section {

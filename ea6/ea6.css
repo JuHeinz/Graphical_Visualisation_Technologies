@@ -4,7 +4,6 @@
 }
 
 canvas {
-    border: 1px solid black;
     margin: auto;
 }
 
@@ -48,7 +47,11 @@ canvas {
     margin: auto;
     padding: 1em;
     text-align: center;
+}
 
+#grid-middle>h5 {
+    margin: 0;
+    padding: 0;
 }
 
 @media (max-width: 980px) {

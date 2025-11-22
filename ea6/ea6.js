@@ -12,9 +12,11 @@ var app = (function () {
 
     // Model that is target for user input.
     var interactiveModel;
-    const initTorusScale = [1.5, 1.5, 1.5];
-    const initTorusRotation = [0.5, 0.6, 0];
-    let initTorusTranslation = [0, 0.8, 0];
+    var sphereYellow;
+    var sphereCyan;
+    var spherePink;
+    var sphereBlue;
+
 
     var camera = {
         /** Position of the camera. */
@@ -88,31 +90,31 @@ var app = (function () {
         let btnOrbitLeft = document.getElementById('btn-orbit-l');
         let btnOrbitRight = document.getElementById('btn-orbit-r');
 
-        btnOrbitLeft.addEventListener("click", () => orbitCam(-1));
-        btnOrbitRight.addEventListener("click", () => orbitCam(1))
+        btnOrbitLeft.addEventListener("click", () => changeCameraZDegree(-1));
+        btnOrbitRight.addEventListener("click", () => changeCameraZDegree(1))
 
         // Camera Up/Down
         let btnUp = document.getElementById('btn-up');
         let btnDown = document.getElementById('btn-down');
 
-        btnUp.addEventListener("click", () => moveCamUpDown(1));
-        btnDown.addEventListener("click", () => moveCamUpDown(-1));
+        btnUp.addEventListener("click", () => changeCameraUpDown(1));
+        btnDown.addEventListener("click", () => changeCameraUpDown(-1));
 
         // Camera Closer / Further
         let closerBtn = document.getElementById('btn-closer');
         let furthernDown = document.getElementById('btn-further');
 
-        closerBtn.addEventListener("click", () => moveCamCloser(-1));
-        furthernDown.addEventListener("click", () => moveCamCloser(1));
+        closerBtn.addEventListener("click", () => changeCameraDistance(-1));
+        furthernDown.addEventListener("click", () => changeCameraDistance(1));
 
         //Camera ProjectionS
         let btnPerspective = document.getElementById('btn-perspective');
         let btnOrtho = document.getElementById('btn-ortho');
         let btnFrustum = document.getElementById('btn-frustum');
 
-        btnPerspective.addEventListener("click", () => updateProjection("perspective", 2))
-        btnOrtho.addEventListener("click", () => updateProjection("ortho", 2))
-        btnFrustum.addEventListener("click", () => updateProjection("frustum", 1.2))
+        btnPerspective.addEventListener("click", () => changeCameraProjection("perspective", 2))
+        btnOrtho.addEventListener("click", () => changeCameraProjection("ortho", 2))
+        btnFrustum.addEventListener("click", () => changeCameraProjection("frustum", 1.2))
 
         //Camera reset
         let btnResetCam = document.getElementById('btn-resetCam');
@@ -126,15 +128,15 @@ var app = (function () {
         let btnRotateY = document.getElementById('btn-rotateY');
         let btnRotateZ = document.getElementById('btn-rotateZ');
 
-        btnRotateX.addEventListener("click", () => rotateModel(0, 1))
-        btnRotateY.addEventListener("click", () => rotateModel(1, 1))
-        btnRotateZ.addEventListener("click", () => rotateModel(2, 1))
+        btnRotateX.addEventListener("click", () => changeModelRotation(interactiveModel, 0, 1))
+        btnRotateY.addEventListener("click", () => changeModelRotation(interactiveModel, 1, 1))
+        btnRotateZ.addEventListener("click", () => changeModelRotation(interactiveModel, 2, 1))
 
         //Scale
         let btnScaleUp = document.getElementById('btn-scaleUp');
         let btnScaleDown = document.getElementById('btn-scaleDown');
-        btnScaleUp.addEventListener("click", () => scaleModel(1))
-        btnScaleDown.addEventListener("click", () => scaleModel(-1))
+        btnScaleUp.addEventListener("click", () => changeModelScale(interactiveModel, 1))
+        btnScaleDown.addEventListener("click", () => changeModelScale(interactiveModel, -1))
 
         //Translation
         let btnTranslateX = document.getElementById('btn-translateX');
@@ -146,14 +148,14 @@ var app = (function () {
         let btnTranslateZ = document.getElementById('btn-translateZ');
         let btnTranslateZNeg = document.getElementById('btn-translateZNeg');
 
-        btnTranslateX.addEventListener("click", () => translateModel(0, 1))
-        btnTranslateXNeg.addEventListener("click", () => translateModel(0, -1))
+        btnTranslateX.addEventListener("click", () => changeModelTranslation(interactiveModel, 0, 1))
+        btnTranslateXNeg.addEventListener("click", () => changeModelTranslation(interactiveModel, 0, -1))
 
-        btnTranslateY.addEventListener("click", () => translateModel(1, 1))
-        btnTranslateYNeg.addEventListener("click", () => translateModel(1, -1))
+        btnTranslateY.addEventListener("click", () => changeModelTranslation(interactiveModel, 1, 1))
+        btnTranslateYNeg.addEventListener("click", () => changeModelTranslation(interactiveModel, 1, -1))
 
-        btnTranslateZ.addEventListener("click", () => translateModel(2, 1))
-        btnTranslateZNeg.addEventListener("click", () => translateModel(2, -1))
+        btnTranslateZ.addEventListener("click", () => changeModelTranslation(interactiveModel, 2, 1))
+        btnTranslateZNeg.addEventListener("click", () => changeModelTranslation(interactiveModel, 2, -1))
 
         // Model reset
         let btnResetModel = document.getElementById('btn-resetModel');
@@ -274,15 +276,32 @@ var app = (function () {
         let pink = [1, 0, 1, 1];
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
-        createModel("torus", f, white, initTorusTranslation, initTorusRotation, initTorusScale);
+
+        let torusScale = [1.5, 1.5, 1.5];
+        let torusRotation = [0, 0.6, 0];
+        let torusTranslation = [0, 0.4, 0];
+
+        let sphereScale = [.3, .3, .3]
+        let sphereRotation = [0, 0, 0]
+
+
+        createModel("torus", fw, white, torusTranslation, torusRotation, torusScale);
+
+        createModel("sphere", fw, cyan, [1, 0.3, -1], sphereRotation, sphereScale);
+        createModel("sphere", fw, pink, [-1, 0.3, -1], sphereRotation, sphereScale);
+        createModel("sphere", fw, blue, [1, 0.3, 1], sphereRotation, sphereScale);
+        createModel("sphere", fw, yellow, [-1, 0.3, 1], sphereRotation, sphereScale);
+
         createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
-        createModel("sphere", f, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
-        createModel("sphere", f, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", f, blue, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", f, yellow, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
+        sphereCyan = models[1];
+        spherePink = models[2];
+        sphereBlue = models[3];
+        sphereYellow = models[4];
+
 
     }
 
@@ -385,44 +404,44 @@ var app = (function () {
             // Change projection of scene.
             switch (evt.code) {
                 case ("ArrowLeft"): // Orbit Model CCW.
-                    orbitCam(-1);
+                    changeCameraZDegree(-1);
                     break;
                 case ("ArrowRight"):  // Orbit Model CW;
-                    orbitCam(1)
+                    changeCameraZDegree(1)
                     break;
                 case ('KeyN'): //Orbit Distanz erhöhen/verringern
-                    moveCamCloser(sign);
+                    changeCameraDistance(sign);
                     break;
                 case ("ArrowUp"):
-                    moveCamUpDown(-1)
+                    changeCameraUpDown(-1)
                     break;
                 case ("ArrowDown"):
-                    moveCamUpDown(1)
+                    changeCameraUpDown(1)
                     break;
                 case ('KeyH'):
                     // Move camera up and down.
-                    moveCamUpDown(sign);
+                    changeCameraUpDown(sign);
                     break;
                 case ('KeyO'):
-                    updateProjection("ortho", 2)
+                    changeCameraProjection("ortho", 2)
                     break;
                 case ('KeyF'):
-                    updateProjection("frustum", 1.2)
+                    changeCameraProjection("frustum", 1.2)
                     break;
                 case ('KeyP'):
-                    updateProjection("perspective", 2)
+                    changeCameraProjection("perspective", 2)
                     break;
                 case ('KeyR'):
                     resetCamera()
                     break;
                 case ('KeyX'):
-                    rotateModel(0, sign)
+                    changeModelRotation(interactiveModel, 0, sign)
                     break;
                 case ('KeyY'):
-                    rotateModel(1, sign)
+                    changeModelRotation(interactiveModel, 1, sign)
                     break;
                 case ('KeyZ'):
-                    rotateModel(2, sign)
+                    changeModelRotation(interactiveModel, 2, sign)
                     break;
 
             }
@@ -434,18 +453,18 @@ var app = (function () {
      * @param {*} axis 0 = x, 1= y, 2 = z
      * @param {*} sign 1 oder -1
      */
-    function rotateModel(axis, sign) {
+    function changeModelRotation(model, axis, sign) {
         var deltaRotate = Math.PI / 36;
         //Achse der Rotate-Matrix im Model modifizieren. 
-        interactiveModel.rotate[axis] += sign * deltaRotate;
+        model.rotate[axis] += sign * deltaRotate;
         render();
     }
 
-    function scaleModel(sign) {
+    function changeModelScale(model, sign) {
         var deltaScale = 0.05;
-        interactiveModel.scale[0] *= 1 + sign * deltaScale
-        interactiveModel.scale[1] *= 1 + sign * deltaScale
-        interactiveModel.scale[2] *= 1 + sign * deltaScale
+        model.scale[0] *= 1 + sign * deltaScale
+        model.scale[1] *= 1 + sign * deltaScale
+        model.scale[2] *= 1 + sign * deltaScale
         render()
     }
     /**
@@ -453,9 +472,9 @@ var app = (function () {
         * @param {*} axis 0 = x, 1= y, 2 = z
         * @param {*} sign 1 oder -1
         */
-    function translateModel(axis, sign) {
+    function changeModelTranslation(model, axis, sign) {
         var delta = 0.1;
-        interactiveModel.translate[axis] += sign * delta;
+        model.translate[axis] += sign * delta;
         render()
     }
 
@@ -473,7 +492,7 @@ var app = (function () {
      * Kamera rotieren. Winkel, in dem die Kamera zur Z-Achse steht ändern. 
      * @param {} sign -1 = CW, 1 = CCW
      */
-    function orbitCam(sign) {
+    function changeCameraZDegree(sign) {
         var deltaRotate = Math.PI / 36;  // Rotation step.
         camera.zAngle += sign * deltaRotate;
         render()
@@ -482,7 +501,7 @@ var app = (function () {
      * Kamera heranfahren: Kamera-Entfernung zum Zentrum 
      * @param {*} sign -1 = Closer, 1= Further
      */
-    function moveCamCloser(sign) {
+    function changeCameraDistance(sign) {
         var delta = 0.1 //Zoom step
         camera.distance += sign * delta;
         render()
@@ -492,7 +511,7 @@ var app = (function () {
      * Höhe der Kamera ändern. 
      * @param {*} sign  -1 = Down, 1 = up
      */
-    function moveCamUpDown(sign) {
+    function changeCameraUpDown(sign) {
         var delta = 0.1 // height stept
         camera.eye[1] += sign * delta;
         render()
@@ -503,7 +522,7 @@ var app = (function () {
      * @param {*} projectionType 
      * @param {*} lrtb 
      */
-    function updateProjection(projectionType, lrtb) {
+    function changeCameraProjection(projectionType, lrtb) {
         camera.projectionType = projectionType;
         camera.lrtb = lrtb;
         render();

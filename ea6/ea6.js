@@ -17,6 +17,7 @@ var app = (function () {
     var spherePink;
     var sphereBlue;
 
+    let currentPosition = 0;
 
     var camera = {
         /** Position of the camera. */
@@ -276,21 +277,25 @@ var app = (function () {
         let pink = [1, 0, 1, 1];
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
+        generatePositionsInCircle(32)
 
         let torusScale = [1.5, 1.5, 1.5];
-        let torusRotation = [0, 0.6, 0];
-        let torusTranslation = [0, 0.4, 0];
+        let torusRotation = [0, 0, 0];
+        let torusTranslation = [positions_x[0], 1, positions_z[0]];
 
         let sphereScale = [.3, .3, .3]
         let sphereRotation = [0, 0, 0]
 
+        let startIndex1 = positions_x.length / 4
+        let startIndex2 = positions_x.length / 2
+        let startIndex3 = positions_x.length * 0.75
 
         createModel("torus", fw, white, torusTranslation, torusRotation, torusScale);
 
-        createModel("sphere", fw, cyan, [1, 0.3, -1], sphereRotation, sphereScale);
-        createModel("sphere", fw, pink, [-1, 0.3, -1], sphereRotation, sphereScale);
-        createModel("sphere", fw, blue, [1, 0.3, 1], sphereRotation, sphereScale);
-        createModel("sphere", fw, yellow, [-1, 0.3, 1], sphereRotation, sphereScale);
+        createModel("sphere", fw, cyan, [positions_x[0], 1, positions_z[0]], sphereRotation, sphereScale);
+        createModel("sphere", fw, pink, [positions_x[startIndex1], 1, positions_z[startIndex1]], sphereRotation, sphereScale);
+        createModel("sphere", fw, blue, [positions_x[startIndex2], 1, positions_z[startIndex2]], sphereRotation, sphereScale);
+        createModel("sphere", fw, yellow, [positions_x[startIndex3], 1, positions_z[startIndex3]], sphereRotation, sphereScale);
 
         createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
 
@@ -395,21 +400,18 @@ var app = (function () {
 
         window.onkeydown = function (evt) {
 
-            var key = evt.which ? evt.which : evt.keyCode;
-            var c = String.fromCharCode(key);
-
             // Use shift key to change sign: Bestimmt in Welche Richtung rotiert wird.
             var sign = evt.shiftKey ? -1 : 1;
 
             // Change projection of scene.
-            switch (evt.code) {
+            switch (evt.key) {
                 case ("ArrowLeft"): // Orbit Model CCW.
                     changeCameraZDegree(-1);
                     break;
                 case ("ArrowRight"):  // Orbit Model CW;
                     changeCameraZDegree(1)
                     break;
-                case ('KeyN'): //Orbit Distanz erhöhen/verringern
+                case ('n'): //Orbit Distanz erhöhen/verringern
                     changeCameraDistance(sign);
                     break;
                 case ("ArrowUp"):
@@ -418,34 +420,90 @@ var app = (function () {
                 case ("ArrowDown"):
                     changeCameraUpDown(1)
                     break;
-                case ('KeyH'):
+                case ('h'):
                     // Move camera up and down.
                     changeCameraUpDown(sign);
                     break;
-                case ('KeyO'):
+                case ('o'):
                     changeCameraProjection("ortho", 2)
                     break;
-                case ('KeyF'):
+                case ('f'):
                     changeCameraProjection("frustum", 1.2)
                     break;
-                case ('KeyP'):
+                case ('p'):
                     changeCameraProjection("perspective", 2)
                     break;
-                case ('KeyR'):
+                case ('r'):
                     resetCamera()
                     break;
-                case ('KeyX'):
+                case ('x'):
                     changeModelRotation(interactiveModel, 0, sign)
                     break;
-                case ('KeyY'):
+                case ('y'):
                     changeModelRotation(interactiveModel, 1, sign)
                     break;
-                case ('KeyZ'):
+                case ('z'):
                     changeModelRotation(interactiveModel, 2, sign)
+                    break;
+                case ('k'):
+                    moveSpeheresOneStep()
                     break;
 
             }
         };
+    }
+
+
+
+
+    let positions_x = []
+    let positions_z = []
+
+    /**
+     * Erstellt ein Array an n Positionen auf einem Kreis.
+     * @param {} n 
+     */
+    function generatePositionsInCircle(n) {
+        var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
+        var dt = circle_Umfang / n; //dt = Schrittweite. 
+        console.log("dt: ", dt)
+        var t = 0;
+        var r = 1.0;
+
+        for (var i = 0; i <= n - 1; i++, t += dt) {
+            //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+            var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+            var y = r * Math.sin(t); // Y-Wert an Stelle t berechnen
+
+            positions_x.push(x);
+            positions_z.push(y)
+        }
+        console.log("X - Positionen")
+        console.dir(positions_x)
+        console.log("Y - Positionen")
+        console.dir(positions_z)
+    }
+
+    function moveSpeheresOneStep() {
+        if (currentPosition >= positions_x.length) {
+            currentPosition = 0
+        }
+
+        //Setze x und z Position der Kugeln
+        sphereCyan.translate[0] = positions_x[currentPosition]
+        sphereCyan.translate[2] = positions_z[currentPosition]
+
+        currentPosition++;
+        render()
+    }
+
+    function calcXY(t) {
+
+        var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+        var z = r * Math.sin(t); // Y-Wert an Stelle t berechnen
+
+        return [x, z]
+
     }
 
     /**
@@ -575,10 +633,7 @@ var app = (function () {
             //Zeichnen der Modelle
             draw(models[i]);
         }
-        console.log("==========")
-        console.log("Skalierung: ", interactiveModel.scale)
-        console.log("Rotation: ", interactiveModel.rotate)
-        console.log("Translation: ", interactiveModel.translate)
+
 
     }
 

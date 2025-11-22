@@ -110,6 +110,11 @@ var app = (function () {
         btnPerspective.addEventListener("click", () => updateProjection("perspective", 2))
         btnOrtho.addEventListener("click", () => updateProjection("ortho", 2))
         btnFrustum.addEventListener("click", () => updateProjection("frustum", 1.2))
+
+        //RESET
+        let btnReset = document.getElementById('btn-reset');
+        btnReset.addEventListener("click", () => resetCamera());
+
     }
 
     /**
@@ -326,6 +331,12 @@ var app = (function () {
                 case ('KeyN'): //Orbit Distanz erhöhen/verringern
                     zoomCam(sign);
                     break;
+                case ("ArrowUp"):
+                    moveCamUpDown(-1)
+                    break;
+                case ("ArrowDown"):
+                    moveCamUpDown(1)
+                    break;
                 case ('KeyH'):
                     // Move camera up and down.
                     moveCamUpDown(sign);
@@ -338,6 +349,9 @@ var app = (function () {
                     break;
                 case ('KeyP'):
                     updateProjection("perspective", 2)
+                    break;
+                case ('KeyR'):
+                    resetCamera()
                     break;
 
             }
@@ -376,6 +390,16 @@ var app = (function () {
     function updateProjection(projectionType, lrtb) {
         camera.projectionType = projectionType;
         camera.lrtb = lrtb;
+        render();
+    }
+
+    function resetCamera() {
+        camera.projectionType = "perspective";
+        camera.lrtb = 2;
+        camera.zAngle = 0;
+        camera.distance = 4;
+        camera.eye[1] = 1;
+
         render();
     }
 

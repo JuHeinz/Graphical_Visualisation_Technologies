@@ -232,7 +232,11 @@ var app = (function () {
         // Bestimmt die Kamera-Position, bzw die Modell-Position.
         prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
 
+        //Farbe
         prog.colorUniform = gl.getUniformLocation(prog, "uColor");
+
+        //Normals
+        prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
 
     }
 
@@ -250,12 +254,12 @@ var app = (function () {
         let pink = [1, 0, 1, 1];
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
-        createModel("torus", fw, white, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("torus", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
         createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
-        createModel("sphere", fw, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
-        createModel("sphere", fw, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", fw, blue, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", fw, yellow, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", f, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
+        createModel("sphere", f, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", f, blue, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", f, yellow, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -296,6 +300,9 @@ var app = (function () {
 
         // Create and initialize Model-Matrix.
         model.mMatrix = mat4.create();
+
+        // Create and initialize Normals-Matrix.
+        model.nMatrix = mat3.create();
 
         // Create and initialize Model-View-Matrix.
         model.mvMatrix = mat4.create();
@@ -500,17 +507,19 @@ var app = (function () {
 
 
         // Loop over models.
-        // Jedem Model die view-Matrix aus der Kamera in sein Attribut mvMatrix rüber kopieren.
+
         for (var i = 0; i < models.length; i++) {
             updateTransformations(models[i]);
 
-            // Set uniforms for model.
+            //Uniforms setzen
             //  Wert mvMatrix für Attribut mvMatrixUniform im Shader setzen.
             gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix); //4fv == 4 x 4 Matrix aus Floating Point Werten
 
             //Farbe festlegen.
             gl.uniform4fv(prog.colorUniform, models[i].color);
 
+            //Normals Matrix
+            gl.uniformMatrix3fv(prog.nMatrixUniform, false, models[i].nMatrix);
             //Zeichnen der Modelle
             draw(models[i]);
         }
@@ -541,6 +550,9 @@ var app = (function () {
         // by matrix multiplication to mvMatrix.
         //Berechnen der Model-View Matrix durch multiplizieren von Model-Matrix (aus Model) und ViewMatrix (aus Kamera).     
         mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
+
+        // Calculate normal matrix from model-view matrix.
+        mat3.normalFromMat4(model.nMatrix, mvMatrix);
     }
 
     /**

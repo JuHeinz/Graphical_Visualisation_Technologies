@@ -21,7 +21,7 @@ var app = (function () {
 
     var camera = {
         /** Position of the camera. */
-        eye: [0, 1, 4],
+        eye: [0, 2, 4],
 
         /** Point to look at. */
         center: [0, 0, 0],
@@ -279,23 +279,23 @@ var app = (function () {
         let yellow = [1, 1, 0, 1];
         generatePositionsInCircle(32)
 
-        let torusScale = [1.5, 1.5, 1.5];
+        let torusScale = [1, 1, 1];
         let torusRotation = [0, 0, 0];
         let torusTranslation = [positions_x[0], 1, positions_z[0]];
 
-        let sphereScale = [.3, .3, .3]
+        let sphereScale = [.1, .1, .1]
         let sphereRotation = [0, 0, 0]
 
-        let startIndex1 = positions_x.length / 4
-        let startIndex2 = positions_x.length / 2
-        let startIndex3 = positions_x.length * 0.75
+        let startIndex1 = Math.floor(positions_x.length * 0.25) //get position at 25% of circle
+        let startIndex2 = Math.floor(positions_x.length * 0.5)
+        let startIndex3 = Math.floor(positions_x.length * 0.75)
 
-        createModel("torus", fw, white, torusTranslation, torusRotation, torusScale);
+        createModel("torus", fw, white, torusTranslation, torusRotation, torusScale, 0);
 
-        createModel("sphere", fw, cyan, [positions_x[0], 1, positions_z[0]], sphereRotation, sphereScale);
-        createModel("sphere", fw, pink, [positions_x[startIndex1], 1, positions_z[startIndex1]], sphereRotation, sphereScale);
-        createModel("sphere", fw, blue, [positions_x[startIndex2], 1, positions_z[startIndex2]], sphereRotation, sphereScale);
-        createModel("sphere", fw, yellow, [positions_x[startIndex3], 1, positions_z[startIndex3]], sphereRotation, sphereScale);
+        createModel("sphere", fw, cyan, [positions_x[0], 1, positions_z[0]], sphereRotation, sphereScale, 0);
+        createModel("sphere", fw, pink, [positions_x[startIndex1], 1, positions_z[startIndex1]], sphereRotation, sphereScale, startIndex1);
+        createModel("sphere", fw, blue, [positions_x[startIndex2], 1, positions_z[startIndex2]], sphereRotation, sphereScale, startIndex2);
+        createModel("sphere", fw, yellow, [positions_x[startIndex3], 1, positions_z[startIndex3]], sphereRotation, sphereScale, startIndex3);
 
         createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
 
@@ -316,13 +316,13 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle, color, translate, rotate, scale) {
+    function createModel(geometryname, fillstyle, color, translate, rotate, scale, circleIndex) {
         var model = {};
         model.fillstyle = fillstyle;
 
         model.geometry = geometryname; // store name so we can update it later
         model.color = color;
-
+        model.circleIndex = circleIndex;
 
         initDataAndBuffers(model, geometryname);
 
@@ -446,7 +446,7 @@ var app = (function () {
                     changeModelRotation(interactiveModel, 2, sign)
                     break;
                 case ('k'):
-                    moveSpeheresOneStep()
+                    startAnimation()
                     break;
 
             }
@@ -478,32 +478,32 @@ var app = (function () {
             positions_x.push(x);
             positions_z.push(y)
         }
-        console.log("X - Positionen")
-        console.dir(positions_x)
-        console.log("Y - Positionen")
-        console.dir(positions_z)
     }
 
-    function moveSpeheresOneStep() {
+    function startAnimation() {
+        updateSpherePositions(sphereBlue)
+        updateSpherePositions(sphereCyan)
+        updateSpherePositions(spherePink)
+        updateSpherePositions(sphereYellow)
+        console.log(sphereCyan.circleIndex)
+        changeModelRotation(interactiveModel, 0, 1)
+        render()
+
+    }
+
+    function updateSpherePositions(sphere) {
+        currentPosition = sphere.circleIndex;
+
         if (currentPosition >= positions_x.length) {
             currentPosition = 0
         }
 
         //Setze x und z Position der Kugeln
-        sphereCyan.translate[0] = positions_x[currentPosition]
-        sphereCyan.translate[2] = positions_z[currentPosition]
+        sphere.translate[0] = positions_x[currentPosition]
+        sphere.translate[2] = positions_z[currentPosition]
 
         currentPosition++;
-        render()
-    }
-
-    function calcXY(t) {
-
-        var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
-        var z = r * Math.sin(t); // Y-Wert an Stelle t berechnen
-
-        return [x, z]
-
+        sphere.circleIndex = currentPosition
     }
 
     /**
@@ -512,9 +512,10 @@ var app = (function () {
      * @param {*} sign 1 oder -1
      */
     function changeModelRotation(model, axis, sign) {
-        var deltaRotate = Math.PI / 36;
+        var deltaRotate = Math.PI / 8;
         //Achse der Rotate-Matrix im Model modifizieren. 
         model.rotate[axis] += sign * deltaRotate;
+        console.log(model.rotate)
         render();
     }
 
@@ -541,8 +542,8 @@ var app = (function () {
      */
     function resetModel() {
         interactiveModel.scale = [1.5, 1.5, 1.5];
-        interactiveModel.translate = [0, 0.8, 0];
-        interactiveModel.rotate = [0.5, 0.6, 0];
+        interactiveModel.rotate = [0, 0, 0];
+        interactiveModel.translate = [positions_x[0], 1, positions_z[0]];
         render()
     }
 
@@ -594,7 +595,7 @@ var app = (function () {
         camera.lrtb = 2;
         camera.zAngle = 0;
         camera.distance = 4;
-        camera.eye[1] = 1;
+        camera.eye[1] = 2;
 
         render();
     }
@@ -613,7 +614,6 @@ var app = (function () {
 
         // Set view matrix depending on camera attributes.
         mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
-
 
         // Loop over models.
 

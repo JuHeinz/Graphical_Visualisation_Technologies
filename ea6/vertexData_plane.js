@@ -37,7 +37,7 @@ var plane = (function () {
 
 				// Set vertex positions.
 				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y - 1.2;
+				vertices[iVertex * 3 + 1] = y;
 				vertices[iVertex * 3 + 2] = z;
 
 				// Calc and set normals.

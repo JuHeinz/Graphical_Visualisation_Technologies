@@ -10,6 +10,9 @@ var app = (function () {
     // Array of model objectst to render in this scene.
     var models = [];
 
+    // Model that is target for user input.
+    var interactiveModel;
+
     var recursionLevel = 0;          // current recursion level for recursiveSphere
     var maxRecursionLevel = 3;       // avoid explosion in vertex count
 
@@ -227,10 +230,23 @@ var app = (function () {
      */
     function initModels() {
         // fill-style
-        createModel("torus", "fillwireframe");
-        createModel("plane", "wireframe");
-        createModel("sphere", "fillwireframe");
-        //createModel("triangle", "fillwireframe");
+        let fw = "fillwireframe";
+        let f = "fill";
+        let w = "wireframe"
+
+        createModel("torus", fw, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("plane", w, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("sphere", fw, [1, -.3, -1], [0, 0, 0],
+            [1, 1, 1]);
+        createModel("sphere", fw, [-1, -.3, -1], [0, 0, 0],
+            [.5, .5, .5]);
+        createModel("sphere", fw, [1, -.3, 1], [0, 0, 0],
+            [.5, .5, .5]);
+        createModel("sphere", fw, [-1, -.3, 1], [0, 0, 0],
+            [.5, .5, .5]);
+
+        // Select one model that can be manipulated interactively by user.
+        interactiveModel = models[0];
 
     }
 
@@ -240,17 +256,34 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle) {
+    function createModel(geometryname, fillstyle, translate, rotate, scale) {
         var model = {};
         model.fillstyle = fillstyle;
 
         model.geometry = geometryname; // store name so we can update it later
 
         initDataAndBuffers(model, geometryname);
-        // Create and initialize Model-View-Matrix.
-        model.mvMatrix = mat4.create();
+
+        initTransformations(model, translate, rotate, scale);
 
         models.push(model);
+    }
+
+    /**
+     * Die Funktion initTransformations speichert die Arrays translate, rotate und scale in das übergebene Model-Objekt.
+     *  Zusätzlich werden eine Model-Matrix mMatrix und eine Model-View-Matrix mvMatrix für jedes Model angelegt:
+     */
+    function initTransformations(model, translate, rotate, scale) {
+        // Store transformation vectors.
+        model.translate = translate;
+        model.rotate = rotate;
+        model.scale = scale;
+
+        // Create and initialize Model-Matrix.
+        model.mMatrix = mat4.create();
+
+        // Create and initialize Model-View-Matrix.
+        model.mvMatrix = mat4.create();
     }
 
     /**
@@ -420,16 +453,37 @@ var app = (function () {
         // Loop over models.
         // Jedem Model die view-Matrix aus der Kamera in sein Attribut mvMatrix rüber kopieren.
         for (var i = 0; i < models.length; i++) {
-            // Update modelview for model.
-            mat4.copy(models[i].mvMatrix, camera.vMatrix);
+            updateTransformations(models[i]);
 
             // Set uniforms for model.
-            // Fester Wert mvMatrix für Attribut mvMatrixUniform im Shader setzen.
+            //  Wert mvMatrix für Attribut mvMatrixUniform im Shader setzen.
             gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix); //4fv == 4 x 4 Matrix aus Floating Point Werten
 
             //Zeichnen der Modelle
             draw(models[i]);
         }
+    }
+
+    function updateTransformations(model) {
+
+        // Use shortcut variables.
+        var mMatrix = model.mMatrix;
+        var mvMatrix = model.mvMatrix;
+
+        // Reset matrices to identity.         
+        mat4.identity(mMatrix);
+        mat4.identity(mvMatrix);
+
+        // Model Matrix via translate verschieben.
+        mat4.translate(mMatrix, mMatrix, model.translate);
+
+        // Model Matrix via scale vergrößern/verkleinern.
+        mat4.scale(mMatrix, mMatrix, model.scale);
+
+        // Combine view and model matrix
+        // by matrix multiplication to mvMatrix.
+        //Berechnen der Model-View Matrix durch multiplizieren von Model-Matrix (aus Model) und ViewMatrix (aus Kamera).     
+        mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
     }
 
     /**

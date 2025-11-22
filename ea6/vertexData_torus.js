@@ -33,7 +33,7 @@ var torus = (function () {
 
 				var x = (R + r * Math.cos(u)) * Math.cos(v);
 				var y = (R + r * Math.cos(u)) * Math.sin(v);
-				var z = r * Math.sin(u) + 2;
+				var z = r * Math.sin(u);
 
 				// Set vertex positions.
 				vertices[iVertex * 3] = x;

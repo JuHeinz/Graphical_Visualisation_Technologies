@@ -552,7 +552,7 @@ var app = (function () {
      * Rotatations, Translations und Skalierungs-Matrix des Models auf Default zurücksetzen. 
      */
     function resetModel() {
-        interactiveModel.scale = [1.5, 1.5, 1.5];
+        interactiveModel.scale = [1, 1, 1];
         interactiveModel.rotate = [0, 0, 0];
         interactiveModel.translate = [positions_x[0], 1, positions_z[0]];
         render()
@@ -608,8 +608,8 @@ var app = (function () {
     function resetCamera() {
         camera.projectionType = "perspective";
         camera.lrtb = 2;
-        camera.zAngle = 0;
-        camera.distance = 2;
+        camera.zAngle = -0.6;
+        camera.distance = 2.5;
         camera.eye[1] = 2;
 
         render();

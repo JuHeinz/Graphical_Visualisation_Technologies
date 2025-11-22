@@ -231,6 +231,9 @@ var app = (function () {
         // Model-View-Matrix
         // Bestimmt die Kamera-Position, bzw die Modell-Position.
         prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
+
+        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
+
     }
 
     /**
@@ -242,13 +245,17 @@ var app = (function () {
         let fw = "fillwireframe";
         let f = "fill";
         let w = "wireframe"
-
-        createModel("torus", fw, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
-        createModel("plane", w, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
-        createModel("sphere", fw, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
-        createModel("sphere", fw, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", fw, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
-        createModel("sphere", fw, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+        let white = [1, 1, 1, 1];
+        let cyan = [0, 1, 1, 1];
+        let pink = [1, 0, 1, 1];
+        let blue = [0, 0, 1, 1];
+        let yellow = [1, 1, 0, 1];
+        createModel("torus", fw, white, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("sphere", fw, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
+        createModel("sphere", fw, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", fw, blue, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", fw, yellow, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -261,11 +268,13 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle, translate, rotate, scale) {
+    function createModel(geometryname, fillstyle, color, translate, rotate, scale) {
         var model = {};
         model.fillstyle = fillstyle;
 
         model.geometry = geometryname; // store name so we can update it later
+        model.color = color;
+
 
         initDataAndBuffers(model, geometryname);
 
@@ -499,6 +508,9 @@ var app = (function () {
             //  Wert mvMatrix für Attribut mvMatrixUniform im Shader setzen.
             gl.uniformMatrix4fv(prog.mvMatrixUniform, false, models[i].mvMatrix); //4fv == 4 x 4 Matrix aus Floating Point Werten
 
+            //Farbe festlegen.
+            gl.uniform4fv(prog.colorUniform, models[i].color);
+
             //Zeichnen der Modelle
             draw(models[i]);
         }
@@ -602,6 +614,17 @@ var app = (function () {
         //Entspricht der parametrischen Form des Kreises x = r * cos(t), y= r*sin(t)
         camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+    }
+
+    /*
+    RGBA Farben von Wertebereich [0,255] zu Wertebereich[0,1] transformieren.
+    */
+    function convertRGB(r, g, b, a) {
+        var r_new = r / 255;
+        var g_new = g / 255
+        var b_new = b / 255
+        var a_new = a / 255
+        return []
     }
 
     // App interface.

@@ -133,7 +133,24 @@ var app = (function () {
         btnScaleUp.addEventListener("click", () => scaleModel(1))
         btnScaleDown.addEventListener("click", () => scaleModel(-1))
 
+        //Translation
+        let btnTranslateX = document.getElementById('btn-translateX');
+        let btnTranslateXNeg = document.getElementById('btn-translateXNeg');
 
+        let btnTranslateY = document.getElementById('btn-translateY');
+        let btnTranslateYNeg = document.getElementById('btn-translateYNeg');
+
+        let btnTranslateZ = document.getElementById('btn-translateZ');
+        let btnTranslateZNeg = document.getElementById('btn-translateZNeg');
+
+        btnTranslateX.addEventListener("click", () => translateModel(0, 1))
+        btnTranslateXNeg.addEventListener("click", () => translateModel(0, -1))
+
+        btnTranslateY.addEventListener("click", () => translateModel(1, 1))
+        btnTranslateYNeg.addEventListener("click", () => translateModel(1, -1))
+
+        btnTranslateZ.addEventListener("click", () => translateModel(2, 1))
+        btnTranslateZNeg.addEventListener("click", () => translateModel(2, -1))
 
         // Model reset
         let btnResetModel = document.getElementById('btn-resetModel');
@@ -255,7 +272,7 @@ var app = (function () {
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
         createModel("torus", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
-        createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
         createModel("sphere", f, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
         createModel("sphere", f, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
         createModel("sphere", f, blue, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
@@ -428,6 +445,16 @@ var app = (function () {
         interactiveModel.scale[2] *= 1 + sign * deltaScale
         render()
     }
+    /**
+        * Transformiere das Modell auf der gegebenen Achse
+        * @param {*} axis 0 = x, 1= y, 2 = z
+        * @param {*} sign 1 oder -1
+        */
+    function translateModel(axis, sign) {
+        var delta = Math.PI / 36;
+        interactiveModel.translate[axis] += sign * delta;
+        render()
+    }
 
     /**
      * Rotatations, Translations und Skalierungs-Matrix des Models auf Default zurücksetzen. 
@@ -435,6 +462,7 @@ var app = (function () {
     function resetModel() {
         interactiveModel.rotate = [0, 0, 0];
         interactiveModel.scale = [1, 1, 1];
+        interactiveModel.translate = [0, 0, 0]
         render()
     }
 

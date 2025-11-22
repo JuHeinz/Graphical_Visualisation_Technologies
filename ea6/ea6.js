@@ -62,10 +62,10 @@ var app = (function () {
          * In welchem Winkel die Kamera zur Z-Achse steht. Hiermit kann man um das Zentrum rotieren.
          * Angabe in Radian.
         */
-        zAngle: 0,
+        zAngle: -0.6,
 
-        /**  Distance in XZ-Plane from center when orbiting. */
-        distance: 4,
+        /**  Distance in XZ-Plane from center. */
+        distance: 2.5,
     };
 
     function start() {
@@ -170,6 +170,8 @@ var app = (function () {
     function initWebGL() {
         canvas = document.getElementById('canvas');
         gl = canvas.getContext('experimental-webgl');
+        canvas.width = Math.round(canvas.clientWidth * devicePixelRatio)
+        canvas.height = Math.round(canvas.clientHeight * devicePixelRatio)
         gl.viewportWidth = canvas.width;
         gl.viewportHeight = canvas.height;
     }
@@ -283,7 +285,7 @@ var app = (function () {
         let torusRotation = [0, 0, 0];
         let torusTranslation = [positions_x[0], 1, positions_z[0]];
 
-        let sphereScale = [.1, .1, .1]
+        let sphereScale = [.05, .05, .05]
         let sphereRotation = [0, 0, 0]
 
         let startIndex1 = Math.floor(positions_x.length * 0.25) //get position at 25% of circle
@@ -292,12 +294,12 @@ var app = (function () {
 
         createModel("torus", fw, white, torusTranslation, torusRotation, torusScale, 0);
 
-        createModel("sphere", fw, cyan, [positions_x[0], 1, positions_z[0]], sphereRotation, sphereScale, 0);
-        createModel("sphere", fw, pink, [positions_x[startIndex1], 1, positions_z[startIndex1]], sphereRotation, sphereScale, startIndex1);
-        createModel("sphere", fw, blue, [positions_x[startIndex2], 1, positions_z[startIndex2]], sphereRotation, sphereScale, startIndex2);
-        createModel("sphere", fw, yellow, [positions_x[startIndex3], 1, positions_z[startIndex3]], sphereRotation, sphereScale, startIndex3);
+        createModel("sphere", f, cyan, [positions_x[0], 1, positions_z[0]], sphereRotation, sphereScale, 0);
+        createModel("sphere", f, pink, [positions_x[startIndex1], 1, positions_z[startIndex1]], sphereRotation, sphereScale, startIndex1);
+        createModel("sphere", f, blue, [positions_x[startIndex2], 1, positions_z[startIndex2]], sphereRotation, sphereScale, startIndex2);
+        createModel("sphere", f, yellow, [positions_x[startIndex3], 1, positions_z[startIndex3]], sphereRotation, sphereScale, startIndex3);
 
-        createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
+        createModel("plane", w, white, [0, 0.3, 0], [0, 0, 0], [3, 3, 3]);
 
 
         // Select one model that can be manipulated interactively by user.
@@ -399,10 +401,6 @@ var app = (function () {
     function initEventHandler() {
 
         window.onkeydown = function (evt) {
-
-            // Use shift key to change sign: Bestimmt in Welche Richtung rotiert wird.
-            var sign = evt.shiftKey ? -1 : 1;
-
             // Change projection of scene.
             switch (evt.key) {
                 case ("ArrowLeft"): // Orbit Model CCW.
@@ -412,7 +410,10 @@ var app = (function () {
                     changeCameraZDegree(1)
                     break;
                 case ('n'): //Orbit Distanz erhöhen/verringern
-                    changeCameraDistance(sign);
+                    changeCameraDistance(1);
+                    break;
+                case ('N'): //Orbit Distanz erhöhen/verringern
+                    changeCameraDistance(-1);
                     break;
                 case ("ArrowUp"):
                     changeCameraUpDown(-1)
@@ -422,7 +423,11 @@ var app = (function () {
                     break;
                 case ('h'):
                     // Move camera up and down.
-                    changeCameraUpDown(sign);
+                    changeCameraUpDown(1);
+                    break;
+                case ('H'):
+                    // Move camera up and down.
+                    changeCameraUpDown(-1);
                     break;
                 case ('o'):
                     changeCameraProjection("ortho", 2)
@@ -437,13 +442,22 @@ var app = (function () {
                     resetCamera()
                     break;
                 case ('x'):
-                    changeModelRotation(interactiveModel, 0, sign)
+                    changeModelRotation(interactiveModel, 0, 1)
+                    break;
+                case ('X'):
+                    changeModelRotation(interactiveModel, 0, -1)
+                    break;
+                case ('Y'):
+                    changeModelRotation(interactiveModel, 1, -1)
                     break;
                 case ('y'):
-                    changeModelRotation(interactiveModel, 1, sign)
+                    changeModelRotation(interactiveModel, 1, 1)
                     break;
                 case ('z'):
-                    changeModelRotation(interactiveModel, 2, sign)
+                    changeModelRotation(interactiveModel, 2, 1)
+                    break;
+                case ('Z'):
+                    changeModelRotation(interactiveModel, 2, -1)
                     break;
                 case ('k'):
                     startAnimation()
@@ -466,7 +480,6 @@ var app = (function () {
     function generatePositionsInCircle(n) {
         var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
         var dt = circle_Umfang / n; //dt = Schrittweite. 
-        console.log("dt: ", dt)
         var t = 0;
         var r = 1.0;
 
@@ -485,7 +498,6 @@ var app = (function () {
         updateSpherePositions(sphereCyan)
         updateSpherePositions(spherePink)
         updateSpherePositions(sphereYellow)
-        console.log(sphereCyan.circleIndex)
         changeModelRotation(interactiveModel, 0, 1)
         render()
 
@@ -515,7 +527,6 @@ var app = (function () {
         var deltaRotate = Math.PI / 8;
         //Achse der Rotate-Matrix im Model modifizieren. 
         model.rotate[axis] += sign * deltaRotate;
-        console.log(model.rotate)
         render();
     }
 
@@ -554,6 +565,7 @@ var app = (function () {
     function changeCameraZDegree(sign) {
         var deltaRotate = Math.PI / 36;  // Rotation step.
         camera.zAngle += sign * deltaRotate;
+        console.log("Camera Z-Angle: " + camera.zAngle)
         render()
     }
     /**
@@ -563,6 +575,7 @@ var app = (function () {
     function changeCameraDistance(sign) {
         var delta = 0.1 //Zoom step
         camera.distance += sign * delta;
+        console.log("Camera Distance: " + camera.distance)
         render()
     }
 
@@ -573,6 +586,8 @@ var app = (function () {
     function changeCameraUpDown(sign) {
         var delta = 0.1 // height stept
         camera.eye[1] += sign * delta;
+        console.log("Camera Eye: " + camera.eye)
+
         render()
     }
 
@@ -594,7 +609,7 @@ var app = (function () {
         camera.projectionType = "perspective";
         camera.lrtb = 2;
         camera.zAngle = 0;
-        camera.distance = 4;
+        camera.distance = 2;
         camera.eye[1] = 2;
 
         render();

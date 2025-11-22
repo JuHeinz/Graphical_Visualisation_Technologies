@@ -1,0 +1,68 @@
+#part-1 {
+    display: flex;
+    flex-direction: row;
+}
+
+canvas {
+    border: 1px solid black;
+    margin: auto;
+}
+
+.control-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff16;
+    padding: 1em;
+    border-radius: 1rem;
+}
+
+
+.camera-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+
+#btn-up {
+    grid-area: 1 / 2 / 2 / 3;
+}
+
+#btn-orbit-l {
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+#btn-orbit-r {
+    grid-area: 2 / 3 / 3 / 4;
+}
+
+#btn-down {
+    grid-area: 3 / 2 / 4 / 3;
+}
+
+#grid-middle {
+    grid-area: 2 / 2 / 3 / 3;
+    margin: auto;
+    padding: 1em;
+    text-align: center;
+
+}
+
+@media (max-width: 980px) {
+    #part-1 {
+        flex-direction: column;
+    }
+}
+
+
+
+
+
+
+
+#btn-closer {}
+
+#btn-further {}

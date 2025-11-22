@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>EA 6 | Graphical Visualisation Technologies</title>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+        <link rel="stylesheet" href="../styles.css">
+        <link rel="stylesheet" href="./ea6.css">
+        <script src="../ext/gl-matrix.js"></script>
+        <script src="./vertexData_torus.js"></script>
+        <script src="./vertexData_plane.js"></script>
+        <script src="./vertexData_sphere.js"></script>
+        <script src="./vertexData_recursive-sphere.js"></script>
+        <script src="./vertexData_triangle.js"></script>
+
+        <script src="./ea6.js"></script>
+
+        <!--VERTEX SHADER-->
+        <script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+	
+				vColor = vec4(aNormal.x, aNormal.y, aNormal.z, 1.0);
+				vColor = (vColor + 1.0) / 2.0;
+			}
+		</script>
+
+        <!--FRAGMENT SHADER-->
+        <script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+
+    </head>
+
+    <body onload="app.start()">
+
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary" id="global-nav">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Graphical Visualisation Technologies</a>
+
+                    <div class="navbar-nav">
+                        <a class="nav-link " href="../index.html">Aufgabenübersicht</a>
+                    </div>
+
+                </div>
+            </nav>
+
+            <div class="title-section">
+                <h1 class="display-5">Einsendeaufgabe 6</h1>
+                <p class="lead">
+                    Kamerabewegung
+                </p>
+            </div>
+
+        </header>
+
+        <main class="d-flex flex-column gap-2">
+            <!--AUFGABE-->
+            <section id="part-1">
+                <canvas id="canvas" width="1000px" height="500px"></canvas>
+
+                <div class="control-section">
+
+                    <div class="camera-grid m-1" role="group">
+                        <button id="btn-up" class="btn btn-outline-light" type="button"> ↑ <code>h</code>
+                        </button>
+                        <button id="btn-down" class="btn btn-outline-light" type="button">↓
+                            <code>Shift + h </code></button>
+                        <button id="btn-orbit-l" class="btn btn-outline-light" type="button"> ←
+                            <code>Pfeiltaste ←</code>
+                        </button>
+                        <button id="btn-orbit-r" class="btn btn-outline-light" type="button">
+                            → <code>Pfeiltaste →</code> </button>
+                        <div id="grid-middle">
+                            <p>Kamera-Bewegung</p>
+                        </div>
+                    </div>
+
+                    <h5>Zoom</h5>
+                    <div class="d-flex flex-column gap-2 m-3" role="group">
+                        <button id="btn-closer" class="btn btn-outline-light" type="button"> +
+                            <code>(Shift + n) </code></button>
+                        <button id="btn-further" class="btn btn-outline-light" type="button"> -
+                            <code>(n) </code></button>
+                    </div>
+
+                    <h5>Kamera-Projektion</h5>
+                    <div class="flex m-3" role="group">
+                        <button id="btn-perspective" type="button" class="btn btn-outline-light">Perspective
+                            <code>p</code></button>
+                        <button id="btn-ortho" type="button" class="btn btn-outline-light">Orthogonal
+                            <code>o</code></button>
+                        <button id="btn-frustum" type="button" class="btn btn-outline-light">Frustum
+                            <code>f</code></button>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <footer>
+            <p class="text-body-secondary">Julia Heinzelmann</p>
+            <p class="text-body-secondary">Berliner Hochschule für Technik </p>
+            <p class="text-body-secondary"> <a
+                    href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Gitub Repository</a></p>
+        </footer>
+
+    </body>
+
+</html>

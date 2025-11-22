@@ -11,11 +11,9 @@
         <link rel="stylesheet" href="../styles.css">
         <link rel="stylesheet" href="./ea6.css">
         <script src="../ext/gl-matrix.js"></script>
-        <script src="./vertexData_torus.js"></script>
-        <script src="./vertexData_plane.js"></script>
-        <script src="./vertexData_sphere.js"></script>
-        <script src="./vertexData_recursive-sphere.js"></script>
-        <script src="./vertexData_triangle.js"></script>
+        <script src="../models/vertexData_torus.js"></script>
+        <script src="../models/vertexData_plane.js"></script>
+        <script src="../models/vertexData_sphere.js"></script>
 
         <script src="./ea6.js"></script>
 
@@ -77,7 +75,7 @@
             <section id="part-1">
                 <canvas id="canvas" width="1000px" height="500px"></canvas>
 
-                <div class="control-section">
+                <div class="camera-control-section">
 
                     <div class="camera-grid m-1" role="group">
                         <button id="btn-up" class="btn btn-outline-light" type="button"> ↑
@@ -113,9 +111,25 @@
                             <code>(f)</code></button>
                     </div>
                     <hr>
-                    <button id="btn-reset" type="button" class="btn btn-outline-light">Reset
+                    <button id="btn-resetCam" type="button" class="btn btn-outline-light">Reset
                         <code>r</code></button>
 
+                </div>
+
+                <div class="model-control-section">
+                    <h4>Modell-Interaktion</h4>
+                    <p><code>Shift</code> drücken um Richtung zu ändern.</p>
+                    <div class="d-flex flex-column gap-2 m-3" role="group">
+                        <button id="btn-rotateX" class="btn btn-outline-light" type="button"> Rotate y
+                            <code>(y) </code></button>
+                        <button id="btn-rotateY" class="btn btn-outline-light" type="button"> Rotate X
+                            <code>(x) </code></button>
+                        <button id="btn-rotateZ" class="btn btn-outline-light" type="button"> Rotate z
+                            <code>(z) </code></button>
+                    </div>
+                    <hr>
+                    <button id="btn-resetModel" type="button" class="btn btn-outline-light">Reset
+                    </button>
                 </div>
 
             </section>

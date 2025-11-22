@@ -84,28 +84,29 @@ var app = (function () {
     }
 
     function initHTML() {
-        //CAMERA ROTATION
+        // CAMERA
+        // Camera Rotation
         let btnOrbitLeft = document.getElementById('btn-orbit-l');
         let btnOrbitRight = document.getElementById('btn-orbit-r');
 
         btnOrbitLeft.addEventListener("click", () => orbitCam(-1));
         btnOrbitRight.addEventListener("click", () => orbitCam(1))
 
-        // CAMERA UP DOWN
+        // Camera Up/Down
         let btnUp = document.getElementById('btn-up');
         let btnDown = document.getElementById('btn-down');
 
         btnUp.addEventListener("click", () => moveCamUpDown(1));
         btnDown.addEventListener("click", () => moveCamUpDown(-1));
 
-        // CAMERA ZOOM
+        // Camera Closer / Further
         let closerBtn = document.getElementById('btn-closer');
         let furthernDown = document.getElementById('btn-further');
 
         closerBtn.addEventListener("click", () => moveCamCloser(-1));
         furthernDown.addEventListener("click", () => moveCamCloser(1));
 
-        //PROJECTION
+        //Camera ProjectionS
         let btnPerspective = document.getElementById('btn-perspective');
         let btnOrtho = document.getElementById('btn-ortho');
         let btnFrustum = document.getElementById('btn-frustum');
@@ -114,9 +115,25 @@ var app = (function () {
         btnOrtho.addEventListener("click", () => updateProjection("ortho", 2))
         btnFrustum.addEventListener("click", () => updateProjection("frustum", 1.2))
 
-        //RESET
-        let btnReset = document.getElementById('btn-reset');
-        btnReset.addEventListener("click", () => resetCamera());
+        //Camera reset
+        let btnResetCam = document.getElementById('btn-resetCam');
+        btnResetCam.addEventListener("click", () => resetCamera());
+
+
+        //MODEL TRANSFORMATION
+
+        //Rotation
+        let btnRotateX = document.getElementById('btn-rotateX');
+        let btnRotateY = document.getElementById('btn-rotateY');
+        let btnRotateZ = document.getElementById('btn-rotateZ');
+
+        btnRotateX.addEventListener("click", () => rotateModel(0, 1))
+        btnRotateY.addEventListener("click", () => rotateModel(1, 1))
+        btnRotateZ.addEventListener("click", () => rotateModel(2, 1))
+
+        // Model rest
+        let btnResetModel = document.getElementById('btn-resetModel');
+        btnResetModel.addEventListener("click", () => resetModel());
 
     }
 
@@ -130,19 +147,6 @@ var app = (function () {
         gl.viewportHeight = canvas.height;
     }
 
-    function decreaseRecursionLevel() {
-        if (recursionLevel > 0) {
-            recursionLevel--;
-            updateRecursiveSphereModel();
-        }
-    }
-
-    function increaseRecursionLevel() {
-        if (recursionLevel < maxRecursionLevel) {
-            recursionLevel++;
-            updateRecursiveSphereModel();
-        }
-    }
     /**
      * Init pipeline parameters that will not change again.
      * If projection or viewport change, their setup must
@@ -226,7 +230,8 @@ var app = (function () {
     }
 
     /**
-     * Definieren, welche Models mit welchem Stil gerendert werden sollen.
+     * Definieren, welche Models und mit welchem Stil gerendert werden sollen.
+     * Ursprüngliche Transformation, Rotation und Skalierung festlegen.
      */
     function initModels() {
         // fill-style
@@ -236,14 +241,10 @@ var app = (function () {
 
         createModel("torus", fw, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
         createModel("plane", w, [0, -.8, 0], [0, 0, 0], [1, 1, 1]);
-        createModel("sphere", fw, [1, -.3, -1], [0, 0, 0],
-            [1, 1, 1]);
-        createModel("sphere", fw, [-1, -.3, -1], [0, 0, 0],
-            [.5, .5, .5]);
-        createModel("sphere", fw, [1, -.3, 1], [0, 0, 0],
-            [.5, .5, .5]);
-        createModel("sphere", fw, [-1, -.3, 1], [0, 0, 0],
-            [.5, .5, .5]);
+        createModel("sphere", fw, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
+        createModel("sphere", fw, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", fw, [1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
+        createModel("sphere", fw, [-1, -.3, 1], [0, 0, 0], [.5, .5, .5]);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -270,8 +271,9 @@ var app = (function () {
     }
 
     /**
-     * Die Funktion initTransformations speichert die Arrays translate, rotate und scale in das übergebene Model-Objekt.
-     *  Zusätzlich werden eine Model-Matrix mMatrix und eine Model-View-Matrix mvMatrix für jedes Model angelegt:
+     * Model-Matrix und ModelViewMatrix für das übergebene Model-Objekt anlegen.
+     * Translate, Rotate und Scale-Matrixen in das übergebene Model-Objekt speichern.
+     * 
      */
     function initTransformations(model, translate, rotate, scale) {
         // Store transformation vectors.
@@ -287,9 +289,7 @@ var app = (function () {
     }
 
     /**
-     * Zu einemn Model die Buffer und Vertex, Index und Normal Arrays erstellen. 
-     * Init data and buffers for model object.
-     * 
+     * Zu einemn Model die Buffer und Vertex, Index und Normal Arrays erstellen.      * 
      * @parameter model: a model object to augment with data.
      * @parameter geometryname: string with name of geometry.
      */
@@ -347,7 +347,6 @@ var app = (function () {
 
             var key = evt.which ? evt.which : evt.keyCode;
             var c = String.fromCharCode(key);
-            console.log(evt.code);
 
             // Use shift key to change sign: Bestimmt in Welche Richtung rotiert wird.
             var sign = evt.shiftKey ? -1 : 1;
@@ -385,17 +384,43 @@ var app = (function () {
                 case ('KeyR'):
                     resetCamera()
                     break;
+                case ('KeyX'):
+                    rotateModel(0, sign)
+                    break;
+                case ('KeyY'):
+                    rotateModel(1, sign)
+                    break;
+                case ('KeyZ'):
+                    rotateModel(2, sign)
+                    break;
 
             }
         };
     }
     /**
+     * Rotiere das Modell um eine gegebene Achse.
+     * @param {*} axis 0 = x, 1= y, 2 = z
+     * @param {*} sign 
+     */
+    function rotateModel(axis, sign) {
+        var deltaRotate = Math.PI / 36;
+        //Achse der Rotate-Matrix im Model modifizieren. 
+        interactiveModel.rotate[axis] += sign * deltaRotate;
+        render();
+    }
+
+    function resetModel() {
+        interactiveModel.rotate = [0, 0, 0];
+        render()
+    }
+
+    /**
      * 
      * @param {} sign -1 = CW, 1 = CCW
      */
     function orbitCam(sign) {
-        var delta = Math.PI / 36;  // Rotation step.
-        camera.zAngle += sign * delta;
+        var deltaRotate = Math.PI / 36;  // Rotation step.
+        camera.zAngle += sign * deltaRotate;
         render()
     }
     /**
@@ -417,7 +442,6 @@ var app = (function () {
         camera.eye[1] += sign * delta;
         render()
     }
-
 
     function updateProjection(projectionType, lrtb) {
         camera.projectionType = projectionType;
@@ -476,6 +500,11 @@ var app = (function () {
 
         // Model Matrix via translate verschieben.
         mat4.translate(mMatrix, mMatrix, model.translate);
+
+        // Model Matrix auf seinen drei Achsen rotieren.
+        mat4.rotateX(mMatrix, mMatrix, model.rotate[0]);
+        mat4.rotateY(mMatrix, mMatrix, model.rotate[1]);
+        mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
 
         // Model Matrix via scale vergrößern/verkleinern.
         mat4.scale(mMatrix, mMatrix, model.scale);

@@ -7,7 +7,8 @@ canvas {
     margin: auto;
 }
 
-.control-section {
+.camera-control-section,
+.model-control-section {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -15,7 +16,6 @@ canvas {
     padding: 1em;
     border-radius: 1rem;
 }
-
 
 .camera-grid {
     display: grid;

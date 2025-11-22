@@ -12,6 +12,9 @@ var app = (function () {
 
     // Model that is target for user input.
     var interactiveModel;
+    const initTorusScale = [1.5, 1.5, 1.5];
+    const initTorusRotation = [0.5, 0.6, 0];
+    let initTorusTranslation = [0, 0.8, 0];
 
     var camera = {
         /** Position of the camera. */
@@ -271,7 +274,7 @@ var app = (function () {
         let pink = [1, 0, 1, 1];
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
-        createModel("torus", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1]);
+        createModel("torus", f, white, initTorusTranslation, initTorusRotation, initTorusScale);
         createModel("plane", w, white, [0, -.8, 0], [0, 0, 0], [3, 3, 3]);
         createModel("sphere", f, cyan, [1, -.3, -1], [0, 0, 0], [0.5, 0.5, 0.5]);
         createModel("sphere", f, pink, [-1, -.3, -1], [0, 0, 0], [.5, .5, .5]);
@@ -451,7 +454,7 @@ var app = (function () {
         * @param {*} sign 1 oder -1
         */
     function translateModel(axis, sign) {
-        var delta = Math.PI / 36;
+        var delta = 0.1;
         interactiveModel.translate[axis] += sign * delta;
         render()
     }
@@ -460,9 +463,9 @@ var app = (function () {
      * Rotatations, Translations und Skalierungs-Matrix des Models auf Default zurücksetzen. 
      */
     function resetModel() {
-        interactiveModel.rotate = [0, 0, 0];
-        interactiveModel.scale = [1, 1, 1];
-        interactiveModel.translate = [0, 0, 0]
+        interactiveModel.scale = [1.5, 1.5, 1.5];
+        interactiveModel.translate = [0, 0.8, 0];
+        interactiveModel.rotate = [0.5, 0.6, 0];
         render()
     }
 
@@ -523,6 +526,7 @@ var app = (function () {
      * Run the rendering pipeline.
      */
     function render() {
+
         // Clear framebuffer and depth-/z-buffer.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -548,9 +552,15 @@ var app = (function () {
 
             //Normals Matrix
             gl.uniformMatrix3fv(prog.nMatrixUniform, false, models[i].nMatrix);
+
             //Zeichnen der Modelle
             draw(models[i]);
         }
+        console.log("==========")
+        console.log("Skalierung: ", interactiveModel.scale)
+        console.log("Rotation: ", interactiveModel.rotate)
+        console.log("Translation: ", interactiveModel.translate)
+
     }
 
     function updateTransformations(model) {

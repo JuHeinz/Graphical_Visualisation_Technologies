@@ -202,9 +202,9 @@ var app = (function () {
             let rotate = Math.PI / Math.abs(i)
 
 
-            //Sinuskurve aus Kugeln hinten
-            createModel("sphere", fw, white, [i, Math.sin(i), -8], [0, 0, 0], [.1, .1, .1]);
-            createModel("sphere", fw, white, [i + .5, Math.sin(i + .5), -8], [0, 0, 0], [.1, .1, .1]);
+            //Sinuskurve aus Icosahedron
+            createModel("icosahedron", fw, white, [i, Math.sin(i), -8], [0, 0, 0], [.1, .1, .1]);
+            createModel("icosahedron", fw, white, [i + .5, Math.sin(i + .5), -8], [0, 0, 0], [.1, .1, .1]);
 
 
             //Kreis aus Torus
@@ -212,14 +212,20 @@ var app = (function () {
 
             //Kreis aus Kugeln
             createModel("sphere", fw, white, [xCirc, .5, yCirc], [0, 0, 0], [sC, sC, sC]);
+
+
+
         }
 
         let radiant = -Math.PI / 3
+
         //Torus und Kreis in Mitte
         createModel("torus", fw, white, [0, 0.5, 0], [radiant, radiant, 0], [1, 1, 1]);
         createModel("sphere", fw, white, [0, 0.5, 0], [0, 0, 0], [.1, .1, .1]);
 
 
+        createModel("icosahedron", fw, white, [-1.5, .50, .8], [0, 0, 0], [.2, .2, .2]);
+        createModel("icosahedron", fw, white, [1.5, .50, .8], [0, 0, 0], [.2, .2, .2]);
 
 
 

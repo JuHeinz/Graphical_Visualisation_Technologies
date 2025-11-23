@@ -17,6 +17,7 @@
         <script src="../models/vertexData_torus.js"></script>
         <script src="../models/vertexData_plane.js"></script>
         <script src="../models/vertexData_sphere.js"></script>
+        <script src="../models/vertexData_icosahedron.js"></script>
 
         <script src="./ea7.js"></script>
 
@@ -81,16 +82,26 @@
             <canvas id="canvas"></canvas>
 
             <div class="controls">
-                <h2>Kamera Interaktion</h2>
                 <div>
-                    <p>Kamera mit <code>WS</code> auf Y-Ebene bewegen.</p>
-                    <p>Kamera mit <code>AD</code> auf X-Ebene bewegen.</p>
-                    <p>Mit <code>Pfeiltasten</code> Szene drehen. </p>
-                    <p>Mit <code>Shift + n</code> Kamera heranfahren. Mit <code>n</code> wegfahren. </p>
-                    <p>Kamera-Projektion mit <code>p</code>, <code>o</code> oder <code>f</code> umschalten. </p>
-                    <p>Kamera mit <code>r</code> auf Ausgangsposition / -projektion zurücksetzen.</p>
+                    <h2>Kamera Interaktion</h2>
+
+                    <ul>
+                        <li><code>W,S</code> : auf Y-Ebene bewegen</li>
+                        <li><code>A,D</code> : auf X-Ebene bewegen</li>
+                        <li><code>Pfeiltasten</code> Kamera kreisen </li>
+                        <li><code>(Shift) + n</code> : Kamera Distanz ändern</li>
+                        <li><code>p</code>, <code>o</code> oder <code>f</code> : Projektion umschalten. </li>
+                        <li><code>r</code> : Reset</li>
+                    </ul>
                 </div>
 
+                <div>
+                    <h2>Dokumentation</h2>
+
+                    <p>Die Vertex-Daten für das Icosahedron stammen aus dem Tutorial für Recursive Spheres von <a
+                            href="http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html">Andreas
+                            Kahler</a></p>
+                </div>
             </div>
 
         </main>

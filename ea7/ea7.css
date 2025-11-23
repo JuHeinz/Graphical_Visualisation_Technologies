@@ -13,16 +13,20 @@ canvas {
 
 .controls {
     display: flex;
-    width: 20vw;
+    max-width: 20vw;
     flex-direction: column;
     background-color: #ffffff16;
-    padding: 1em;
     border-radius: 1rem;
+    padding: 1em;
+    margin-bottom: 1em;
+
 }
 
 .controls>div {
-    display: flex;
-    gap: 0.1em;
+    padding: 1em;
     margin-top: 1em;
-    flex-direction: column;
+}
+
+.controls>div>h2 {
+    margin-bottom: 0.4em;
 }

@@ -1,4 +1,4 @@
-var recursivesphere = (function () {
+var icosahedron = (function () {
     const tempVertArray = [];
     function createVertexData() {
         //VERTICES
@@ -46,34 +46,7 @@ var recursivesphere = (function () {
         triIndTemp.push([8, 6, 7])
         triIndTemp.push([9, 8, 1])
 
-        //REFINE TRIANGLES
-        for (i = 0; i < recursionLevel; i++) {
-            let triIndNew = []
-            for (tri of triIndTemp) {
 
-                //Replace Triangle with 4 triangles
-                //a = Mittelpunkt zwischen Vertex 0 und Vertex 1
-                let a = getMiddlePoint(tri[0], tri[1]);
-
-                //b = Mittelpunkt zwischen Vertex 1 und Vertex 2
-                let b = getMiddlePoint(tri[1], tri[2]);
-
-                //c = Mittelpunkt zwischen Vertex 2 und Vertex 0
-                let c = getMiddlePoint(tri[2], tri[0]);
-
-                //Neue Dreiecke mit den errechneten Mittelpunkten bilden:
-                triIndNew.push([tri[0], a, c])
-                triIndNew.push([tri[1], b, a])
-                triIndNew.push([tri[2], c, b])
-                triIndNew.push([a, b, c])
-            }
-
-            triIndTemp = triIndNew;
-            console.log("Tri Indices after rec " + (i + 1) + ":")
-            console.dir(triIndTemp)
-            console.log("Vertices after rec " + (i + 1) + ":")
-            console.dir(tempVertArray)
-        }
 
         //Add triangles to mesh
 
@@ -106,75 +79,6 @@ var recursivesphere = (function () {
 
     }
 
-    let middlePointCashe = new Map();
-    /**
-     * Calculate mid point between two points.
-     * @param {} p1 Index of point 1
-     * @param {*} p2 Index of point 2
-     */
-
-    function getMiddlePoint(p1, p2) {
-        // Check if middle point already created / in cache
-        let firstIsSmaller = p1 < p2;
-        let smallerIndex = firstIsSmaller ? p1 : p2;
-        let greaterIndex = firstIsSmaller ? p2 : p1;
-        const key = `${smallerIndex},${greaterIndex}`; //Create a key that shows for which two points we want to create the middle point. 
-        //console.log("Berechne Middlepoint ", key)
-
-        if (middlePointCashe.has(key)) {
-            //Return index of existing middle point
-            return middlePointCashe.get(key);
-        }
-
-        //Mittelpunkt noch nicht im Cache, also berechnen:
-        //Hole die tatsächlichen x, y, z Koordinaten für den gegeben Index
-        let vertex1 = tempVertArray[p1];
-        let vertex2 = tempVertArray[p2];
-
-        let x1 = vertex1[0];
-        let y1 = vertex1[1];
-        let z1 = vertex1[2];
-
-        let x2 = vertex2[0];
-        let y2 = vertex2[1];
-        let z2 = vertex2[2];
-
-
-        //Create a vertex that is the middle point between the two given points 
-        let middlePoint = [];
-        middlePoint[0] = ((x1 + x2) / 2.0);
-        middlePoint[1] = ((y1 + y2) / 2.0);
-        middlePoint[2] = ((z1 + z2) / 2.0);
-
-
-        let indexOfMiddlePoint = addVertex(middlePoint)
-        middlePointCashe.set(key, indexOfMiddlePoint)
-
-        //Return index of created middle point
-        return indexOfMiddlePoint
-    }
-
-    /**
-     * add vertex to mesh, fix position to be on unit sphere, return index
-     * @param {*} middlePoint 
-     * @returns 
-     */
-
-    function addVertex(middlePoint) {
-        let x = middlePoint[0];
-        let y = middlePoint[1];
-        let z = middlePoint[2];
-        let length = Math.sqrt(x * x + y * y + z * z);
-
-
-        let genormterMiddlePoint = [];
-        genormterMiddlePoint[0] = (x / length);
-        genormterMiddlePoint[1] = (y / length);
-        genormterMiddlePoint[2] = (z / length);
-
-        tempVertArray.push(genormterMiddlePoint)
-        return tempVertArray.indexOf(genormterMiddlePoint)
-    }
 
 
     return {

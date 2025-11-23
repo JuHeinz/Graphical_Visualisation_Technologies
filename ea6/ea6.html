@@ -37,7 +37,6 @@
 	            vec3 tNormal = uNMatrix * aNormal;
 
                 vColor = vec4(tNormal.z, tNormal.z, tNormal.z, 1.0);
-				vColor = (vColor + 1.0) / 2.0;
                 vColor = uColor * (vColor + 1.0) / 2.0;
 
 			}

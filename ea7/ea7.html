@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>EA 7 | Graphical Visualisation Technologies</title>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="../styles.css">
+        <link rel="stylesheet" href="./ea7.css">
+        <script src="../ext/gl-matrix.js"></script>
+        <script src="../models/vertexData_torus.js"></script>
+        <script src="../models/vertexData_plane.js"></script>
+        <script src="../models/vertexData_sphere.js"></script>
+
+        <script src="./ea7.js"></script>
+
+        <!--VERTEX SHADER-->
+        <script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+            uniform vec4 uColor;            
+            uniform mat3 uNMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+	            vec3 tNormal = uNMatrix * aNormal;
+
+                vColor = vec4(tNormal.z, tNormal.z, tNormal.z, 1.0);
+                vColor = uColor * (vColor + 1.0) / 2.0;
+
+			}
+		</script>
+
+        <!--FRAGMENT SHADER-->
+        <script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+
+    </head>
+
+    <body onload="app.start()">
+
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary" id="global-nav">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Graphical Visualisation Technologies</a>
+
+                    <div class="navbar-nav">
+                        <a class="nav-link " href="../index.html">Aufgabenübersicht</a>
+                    </div>
+
+                </div>
+            </nav>
+
+            <div class="title-section">
+                <h1 class="display-5">Einsendeaufgabe 7</h1>
+                <p class="lead">
+                    Z-Buffer Visualisierung
+                </p>
+            </div>
+
+        </header>
+
+        <main>
+            <canvas id="canvas"></canvas>
+
+            <div class="controls">
+                <div>
+                    <h2>Kamera Interaktion</h2>
+                    <p>Kamera mit <code>WS</code> auf Y-Ebene bewegen.</p>
+                    <p>Kamera mit <code>AD</code> auf X-Ebene bewegen.</p>
+                    <p>Mit <code>Pfeiltasten</code> Szene drehen. </p>
+                    <p>Mit <code>Shift + n</code> Kamera heranfahren. Mit <code>n</code> wegfahren. </p>
+                    <p>Kamera-Projektion mit <code>p</code>, <code>o</code> oder <code>f</code> umschalten. </p>
+                    <p>Kamera mit <code>r</code> auf Ausgangsposition / -projektion zurücksetzen.</p>
+                </div>
+
+            </div>
+
+        </main>
+
+        <footer>
+            <p class="text-body-secondary">Julia Heinzelmann</p>
+            <p class="text-body-secondary">Berliner Hochschule für Technik </p>
+            <p class="text-body-secondary"> <a
+                    href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Gitub Repository</a></p>
+        </footer>
+
+    </body>
+
+</html>

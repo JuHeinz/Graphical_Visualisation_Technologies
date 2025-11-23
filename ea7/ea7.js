@@ -12,7 +12,7 @@ var app = (function () {
 
     var camera = {
         /** Position of the camera. */
-        eye: [0, 0, 4],
+        eye: [0, 1, 4],
 
         /** Point to look at. */
         center: [0, 0, 0],
@@ -197,22 +197,56 @@ var app = (function () {
         let defaultRotation = [0, 0, 0];
         let defaultTranslation = [0, 0, 0];
 
-        //Default Torus
-        createModel("torus", fw, white, defaultTranslation, defaultRotation, defaultScale, 0);
-        // große Sphäre
-        createModel("sphere", fw, white, [0.5, 0.3, -1], [0, 1, 0], [.8, .8, .8], 0);
 
-        //Kleine, nahe Sphäre
-        createModel("sphere", fw, white, [-.3, -.3, 0.5], [0, 7, 0], [.1, .1, .1], 0);
+        let furtestZ = -3;
+        let farZ = -2
+        let defualtZ = -1
+        let closeZ = 0
+        let closestZ = 1
 
-        //Kleiner Torus
-        createModel("torus", fw, white, [-0.2, -0.2, 0.3], defaultRotation, [.5, .5, .5], 0);
+        let furthestTranslation = [0, 0, furtestZ];
+        let farTranslation = [0, 0, farZ];
+        let mediumTranslation = [0, 0, defualtZ]
+        let closeTranslation = [0, 0, closeZ]
+        let veryCloseTranslation = [0, 0, closestZ]
 
-        //Liegender Torus
-        createModel("torus", fw, white, [-.7, -.3, -.3], [1.6, 0, 0], defaultScale, 0);
+        let s = "sphere"
+        let sT = 0.1 //Size of Torus
+        for (let i = -10; i < 10; i++) {
+            let x = i;
+            let y = 0;  //Höhe
+            let z = i; //Tiefe
+
+            let xCirc = Math.sin(i)
+            let yCirc = Math.cos(i)
+            let rotate = Math.PI / Math.abs(i)
+
+            sT = 1 / 4
+            let sC = 1 / 100;
+
+            //Sinuskurve aus Kugeln hinten
+            createModel("sphere", fw, white, [i, Math.sin(i), -8], [0, 0, 0], [.1, .1, .1]);
+            createModel("sphere", fw, white, [i + .5, Math.sin(i + .5), -8], [0, 0, 0], [.1, .1, .1]);
+
+
+            //Kreis aus Torus
+            createModel("torus", fw, white, [xCirc, .5, yCirc], [0, 0, 0], [sT, sT, sT]);
+
+            //Kreis aus Kugeln
+            createModel("sphere", fw, white, [xCirc, .5, yCirc], [0, 0, 0], [sC, sC, sC]);
+        }
+
+        let radiant = -Math.PI / 3
+        //Torus und Kreis in Mitte
+        createModel("torus", fw, white, [0, 0.5, 0], [radiant, radiant, 0], [1, 1, 1]);
+        createModel("sphere", fw, white, [0, 0.5, 0], [0, 0, 0], [.1, .1, .1]);
+
+
+
+
 
         //Boden
-        createModel("plane", w, white, [0, -0.4, 0], [0, 0, 0], [3, 3, 3]);
+        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3]);
 
     }
 
@@ -222,13 +256,12 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle, color, translate, rotate, scale, circleIndex) {
+    function createModel(geometryname, fillstyle, color, translate, rotate, scale) {
         var model = {};
         model.fillstyle = fillstyle;
 
         model.geometry = geometryname; // store name so we can update it later
         model.color = color;
-        model.circleIndex = circleIndex;
 
         initDataAndBuffers(model, geometryname);
 
@@ -412,7 +445,7 @@ var app = (function () {
         camera.lrtb = 2;
         camera.zAngle = 0;
         camera.distance = 2;
-        camera.eye = [0, 0, 4];
+        camera.eye = [0, 1, 4];
         camera.center = [0, 0, 0]
 
         console.log("Camera Eye: ", camera.eye)

@@ -188,30 +188,10 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
-        let cyan = [0, 1, 1, 1];
-        let pink = [1, 0, 1, 1];
-        let blue = [0, 0, 1, 1];
-        let yellow = [1, 1, 0, 1];
 
-        let defaultScale = [1, 1, 1];
-        let defaultRotation = [0, 0, 0];
-        let defaultTranslation = [0, 0, 0];
+        let sT = 1 / 4 // Size Torus
+        let sC = 1 / 100; //Size Sphere
 
-
-        let furtestZ = -3;
-        let farZ = -2
-        let defualtZ = -1
-        let closeZ = 0
-        let closestZ = 1
-
-        let furthestTranslation = [0, 0, furtestZ];
-        let farTranslation = [0, 0, farZ];
-        let mediumTranslation = [0, 0, defualtZ]
-        let closeTranslation = [0, 0, closeZ]
-        let veryCloseTranslation = [0, 0, closestZ]
-
-        let s = "sphere"
-        let sT = 0.1 //Size of Torus
         for (let i = -10; i < 10; i++) {
             let x = i;
             let y = 0;  //Höhe
@@ -221,8 +201,6 @@ var app = (function () {
             let yCirc = Math.cos(i)
             let rotate = Math.PI / Math.abs(i)
 
-            sT = 1 / 4
-            let sC = 1 / 100;
 
             //Sinuskurve aus Kugeln hinten
             createModel("sphere", fw, white, [i, Math.sin(i), -8], [0, 0, 0], [.1, .1, .1]);
@@ -358,10 +336,10 @@ var app = (function () {
                 case ("s"):
                     changeCameraUpDown(1)
                     break;
-                case ('a'):
+                case ('d'):
                     changeCameraLeftRight(1);
                     break;
-                case ('d'):
+                case ('a'):
                     changeCameraLeftRight(-1);
                     break;
                 case ('o'):

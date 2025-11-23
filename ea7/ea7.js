@@ -10,12 +10,9 @@ var app = (function () {
     // Array of model objectst to render in this scene.
     var models = [];
 
-    // Model that is target for user input.
-    var interactiveModel;
-
     var camera = {
         /** Position of the camera. */
-        eye: [0, 1, 4],
+        eye: [0, 0, 4],
 
         /** Point to look at. */
         center: [0, 0, 0],
@@ -59,7 +56,7 @@ var app = (function () {
         zAngle: 0,
 
         /**  Distance in XZ-Plane from center. */
-        distance: 3,
+        distance: 2,
     };
 
     function start() {
@@ -196,13 +193,26 @@ var app = (function () {
         let blue = [0, 0, 1, 1];
         let yellow = [1, 1, 0, 1];
 
-        let torusScale = [1, 1, 1];
-        let torusRotation = [0, 0, 0];
-        let torusTranslation = [0, 0, 0];
+        let defaultScale = [1, 1, 1];
+        let defaultRotation = [0, 0, 0];
+        let defaultTranslation = [0, 0, 0];
 
+        //Default Torus
+        createModel("torus", fw, white, defaultTranslation, defaultRotation, defaultScale, 0);
+        // große Sphäre
+        createModel("sphere", fw, white, [0.5, 0.3, -1], [0, 1, 0], [.8, .8, .8], 0);
 
-        createModel("torus", fw, white, torusTranslation, torusRotation, torusScale, 0);
-        createModel("plane", w, white, [0, -0.3, 0], [0, 0, 0], [3, 3, 3]);
+        //Kleine, nahe Sphäre
+        createModel("sphere", fw, white, [-.3, -.3, 0.5], [0, 7, 0], [.1, .1, .1], 0);
+
+        //Kleiner Torus
+        createModel("torus", fw, white, [-0.2, -0.2, 0.3], defaultRotation, [.5, .5, .5], 0);
+
+        //Liegender Torus
+        createModel("torus", fw, white, [-.7, -.3, -.3], [1.6, 0, 0], defaultScale, 0);
+
+        //Boden
+        createModel("plane", w, white, [0, -0.4, 0], [0, 0, 0], [3, 3, 3]);
 
     }
 
@@ -401,8 +411,8 @@ var app = (function () {
         camera.projectionType = "perspective";
         camera.lrtb = 2;
         camera.zAngle = 0;
-        camera.distance = 4;
-        camera.eye[1] = 1;
+        camera.distance = 2;
+        camera.eye = [0, 0, 4];
         camera.center = [0, 0, 0]
 
         console.log("Camera Eye: ", camera.eye)

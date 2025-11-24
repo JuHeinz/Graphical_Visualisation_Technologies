@@ -1,32 +1,45 @@
 main {
     display: flex;
     flex-direction: row;
+    gap: 1em;
+    padding: 1em;
+    height: 100vh;
+
 }
 
 canvas {
     margin: auto;
-    width: 80vw;
-    height: 80vh;
-    padding: 1em;
-
+    width: 80%;
+    height: 100%;
+    padding: 0;
 }
 
 .controls {
     display: flex;
-    max-width: 20vw;
+    max-width: 20%;
     flex-direction: column;
     background-color: #ffffff16;
     border-radius: 1rem;
     padding: 1em;
-    margin-bottom: 1em;
+    gap: 1em;
 
 }
 
-.controls>div {
-    padding: 1em;
-    margin-top: 1em;
-}
+.controls>div {}
 
-.controls>div>h2 {
-    margin-bottom: 0.4em;
+
+
+
+@media (max-width: 1300px) {
+    main {
+        flex-direction: column;
+    }
+
+    .controls {
+        max-width: 100%;
+    }
+
+    canvas {
+        width: 100%;
+    }
 }

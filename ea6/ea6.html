@@ -8,9 +8,7 @@
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
             integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-            crossorigin="anonymous"></script>
+
         <link rel="stylesheet" href="../styles.css">
         <link rel="stylesheet" href="./ea6.css">
         <script src="../ext/gl-matrix.js"></script>
@@ -78,108 +76,125 @@
         </header>
 
         <main>
+            <canvas id="canvas"></canvas>
+
             <div class="controls">
                 <div>
-                    <h2>Aufgabe</h2>
+                    <h2 class="h3 fw-light">Aufgabe</h2>
 
-                    <p>Drücken sie <code>k</code> um einen Schritt in der Animation zu gehen</p>
+                    <p>Drücken sie <span class="badge text-bg-dark"><code>k</code></span> um einen Schritt in der
+                        Animation zu
+                        gehen</p>
+                    <h2 class="h3 fw-light">Benutzerhinweis</h2>
+
+                    <p>Nach Ändern der ViewPort-Größe (z.B. durch Öffnen der Dev-Tools oder Resizing des Fensters)
+                        muss die Seite neu geladen werden, damit die Canvas scharf erscheint.</p>
 
                 </div>
 
                 <div>
-                    <h2>Model Interaktion</h2>
-                    <h5>Rotation</h5>
-                    <p><code>Shift</code> drücken um Richtung zu ändern.</p>
-                    <div class="d-flex flex-column gap-2 m-3" role="group">
-                        <button id="btn-rotateX" class="btn btn-outline-light" type="button"> Rotate x
-                            <code>(x) </code></button>
-                        <button id="btn-rotateY" class="btn btn-outline-light" type="button"> Rotate y
-                            <code>(y) </code></button>
-                        <button id="btn-rotateZ" class="btn btn-outline-light" type="button"> Rotate z
-                            <code>(z) </code></button>
+                    <h2 class="h3 fw-light">Model Interaktion</h2>
+                    <div class="d-flex flex-row gap-2" role="group">
+                        <button id="btn-rotateX" class="btn btn-dark" type="button"> Rotate x
+                            <span class="badge text-bg-dark"><code>x</code></button>
+                        <button id="btn-rotateY" class="btn btn-dark" type="button"> Rotate y
+                            <span class="badge text-bg-dark"><code>y</code></button>
+                        <button id="btn-rotateZ" class="btn btn-dark" type="button"> Rotate z
+                            <span class="badge text-bg-dark"><code>z</code></button>
                     </div>
-                    <h5>Skalierung</h5>
-                    <div class="d-flex flex-column gap-2 m-3" role="group">
-                        <button id="btn-scaleUp" class="btn btn-outline-light" type="button">
-                            Vergrößern</button>
-                        <button id="btn-scaleDown" class="btn btn-outline-light" type="button">
-                            Verkleinern</button>
-                    </div>
+                    <p> <span class="badge text-bg-dark"><code>Shift</code></span> drücken um Richtung zu ändern.</p>
 
-                    <h5>Translation</h5>
-                    <div class="d-flex flex-column gap-2 m-3" role="group">
-                        <div> <span>x</span>
-                            <button id="btn-translateXNeg" class="btn btn-outline-light" type="button">-
-                            </button>
+                    <div class="d-flex flex-row gap-2 justify-content-around" role="group">
+                        <div class="d-flex flex-column gap-1">
+                            <div class="d-flex flex-row gap-1 align-items-baseline">
+                                <span>Translate x </span>
+                                <button id="btn-translateXNeg" class="btn btn-dark" type="button">-
+                                </button>
 
-                            <button id="btn-translateX" class="btn btn-outline-light" type="button">+
-                            </button>
+                                <button id="btn-translateX" class="btn btn-dark" type="button">+
+                                </button>
+                            </div>
+                            <div class="d-flex flex-row gap-1 align-items-baseline">
+                                <span>Translate y </span>
+                                <button id="btn-translateYNeg" class="btn btn-dark" type="button">
+                                    -</button>
+                                <button id="btn-translateY" class="btn btn-dark" type="button"> +</button>
+
+                            </div>
+                            <div class="d-flex flex-row gap-1 align-items-baseline">
+                                <span>Translate z </span>
+                                <button id="btn-translateZNeg" class="btn btn-dark" type="button">
+                                    -</button>
+                                <button id="btn-translateZ" class="btn btn-dark" type="button"> +</button>
+
+                            </div>
                         </div>
-                        <div>
-                            <span>y</span>
-                            <button id="btn-translateYNeg" class="btn btn-outline-light" type="button">
-                                -</button>
-                            <button id="btn-translateY" class="btn btn-outline-light" type="button"> +</button>
-
-                        </div>
-                        <div>
-                            <span>z</span>
-                            <button id="btn-translateZNeg" class="btn btn-outline-light" type="button">
-                                -</button>
-                            <button id="btn-translateZ" class="btn btn-outline-light" type="button"> +</button>
-
+                        <div class="d-flex flex-column gap-2" role="group">
+                            <button id="btn-scaleUp" class="btn btn-dark" type="button">
+                                Vergrößern</button>
+                            <button id="btn-scaleDown" class="btn btn-dark" type="button">
+                                Verkleinern</button>
                         </div>
                     </div>
                     <hr>
-                    <button id="btn-resetModel" type="button" class="btn btn-outline-light">Reset
+                    <button id="btn-resetModel" type="button" class="btn btn-dark w-100">Reset
                     </button>
                 </div>
+            </div>
+            <div class="controls">
                 <div>
-                    <h2>Kamera Interaktion</h2>
 
-                    <h5>Kamera-Bewegung</h5>
-                    <div class="camera-grid m-1" role="group">
-                        <button id="btn-up" class="btn btn-outline-light" type="button"> ↑
-                            <code>(h)</code>
-                        </button>
-                        <button id="btn-down" class="btn btn-outline-light" type="button">↓
-                            <code>(Shift + h)</code></button>
-                        <button id="btn-orbit-l" class="btn btn-outline-light" type="button"> ←
-                            <code>(Arrow Left)</code>
-                        </button>
-                        <button id="btn-orbit-r" class="btn btn-outline-light" type="button">
-                            → <code>(Arrow Right)</code> </button>
-                        <div id="grid-middle">
+                    <h2 class="h3 fw-light">Kamera Interaktion</h2>
+                    <div class="camera-grid">
+                        <div class="d-flex flex-column gap-1" role="group">
+                            <button id="btn-up" class="btn btn-dark text-nowrap" type="button">
+                                ↑
+                                <span class="badge text-bg-dark"><code>h</code>
+                            </button>
+                            <button id="btn-down" class="btn btn-dark text-nowrap" type="button">
+                                ↓
+                                <span class="badge text-bg-dark"><code>Shift + h</code>
+                            </button>
+                        </div>
+
+                        <div class="d-flex flex-row gap-1" role="group">
+                            <button id="btn-orbit-l" class="btn btn-dark" type="button">←
+                                <span class="badge text-bg-dark"><code>Arrow Left</code></span>
+                            </button>
+
+                            <button id="btn-orbit-r" class="btn btn-dark" type="button"> →
+                                <span class="badge text-bg-dark"><code>Arrow Right</code></span>
 
                         </div>
                     </div>
-
-                    <h5>Kamera Heranfahren</h5>
-                    <div class="d-flex flex-column gap-2 m-3" role="group">
-                        <button id="btn-closer" class="btn btn-outline-light" type="button"> Näher dran
-                            <code>(Shift + n) </code></button>
-                        <button id="btn-further" class="btn btn-outline-light" type="button"> Weiter weg
-                            <code>(n) </code></button>
-                    </div>
-
-                    <h5>Kamera-Projektion</h5>
-                    <div class="flex m-3" role="group">
-                        <button id="btn-perspective" type="button" class="btn btn-outline-light">Perspective
-                            <code>(p)</code></button>
-                        <button id="btn-ortho" type="button" class="btn btn-outline-light">Orthogonal
-                            <code>(o)</code></button>
-                        <button id="btn-frustum" type="button" class="btn btn-outline-light">Frustum
-                            <code>(f)</code></button>
-                    </div>
-                    <hr>
-                    <button id="btn-resetCam" type="button" class="btn btn-outline-light">Reset
-                        <code>r</code></button>
-
                 </div>
 
+                <div class="d-flex flex-column gap-2" role="group">
+                    <button id="btn-closer" class="btn btn-dark" type="button"> Näher dran
+                        <span class="badge text-bg-dark"><code>Shift + n</code></span></button>
+                    <button id="btn-further" class="btn btn-dark" type="button"> Weiter weg
+                        <span class="badge text-bg-dark"><code>n</code></span></button>
+                </div>
+
+                <div class="d-flex flex-row gap-2" role="group">
+                    <button id="btn-perspective" type="button" class="btn btn-dark">Perspective
+                        <span class="badge text-bg-dark"><code>p</code></span>
+                    </button>
+                    <button id="btn-ortho" type="button" class="btn btn-dark">Orthogonal
+                        <span class="badge text-bg-dark"><code>o</code></span>
+                    </button>
+                    <button id="btn-frustum" type="button" class="btn btn-dark">Frustum
+                        <span class="badge text-bg-dark"><code>f</code></span>
+                    </button>
+                </div>
+                <hr>
+                <button id="btn-resetCam" type="button" class="btn btn-dark w-100">Reset
+                    <span class="badge text-bg-dark"><code>r</code></span></button>
+
+            </div>
             </div>
 
-            <canvas id="canvas"></canvas>
+            </div>
 
         </main>
 

@@ -199,12 +199,13 @@ var app = (function () {
 
             let xCirc = Math.sin(i)
             let yCirc = Math.cos(i)
-            let rotate = Math.PI / Math.abs(i)
+            let rotate = Math.PI / Math.abs(i + 0.1)
+            console.log(rotate)
 
 
             //Sinuskurve aus Icosahedron
-            createModel("icosahedron", fw, white, [i, Math.sin(i), -8], [0, 0, 0], [.1, .1, .1]);
-            createModel("icosahedron", fw, white, [i + .5, Math.sin(i + .5), -8], [0, 0, 0], [.1, .1, .1]);
+            createModel("icosahedron", fw, white, [i, Math.sin(i), -8], [0, rotate, 0], [.1, .1, .1]);
+            createModel("icosahedron", fw, white, [i + .5, Math.sin(i + .5), -8], [0, rotate, 0], [.1, .1, .1]);
 
 
             //Kreis aus Torus
@@ -407,7 +408,7 @@ var app = (function () {
     function changeCameraLeftRight(sign) {
         var delta = 0.1
         camera.center[0] += sign * delta;
-        console.log("Camera Center: " + camera.center)
+        console.log("Camera Center: ", camera.center)
 
         render()
     }

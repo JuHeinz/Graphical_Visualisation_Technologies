@@ -1,0 +1,42 @@
+main {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    padding: 1em;
+    height: 100vh;
+
+}
+
+canvas {
+    margin: auto;
+    width: 80%;
+    height: 100%;
+    padding: 0;
+}
+
+.controls {
+    display: flex;
+    max-width: 20%;
+    flex-direction: column;
+    background-color: #ffffff16;
+    border-radius: 1rem;
+    padding: 1em;
+    gap: 1em;
+
+}
+
+
+
+@media (max-width: 1300px) {
+    main {
+        flex-direction: column;
+    }
+
+    .controls {
+        max-width: 100%;
+    }
+
+    canvas {
+        width: 100%;
+    }
+}

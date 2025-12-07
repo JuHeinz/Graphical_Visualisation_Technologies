@@ -56,18 +56,17 @@ var app = (function () {
         zAngle: 0,
 
         /**  Distance in XZ-Plane from center. */
-        distance: 2,
+        distance: 4,
     };
 
     // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
     var illumination = {
         ambientLight: [.5, .5, .5],
         //Array aus Punktlichtquellen
-        light: [{
-            isOn: true,
-            position: [3., 1., 3.],
-            color: [1., 1., 1.]
-        },]
+        light: [
+            { isOn: true, position: [3., 1., 3.], color: [1., 1., 1.] },
+            { isOn: true, position: [-3., 1., -3.], color: [.2, 1., 1.] },
+        ]
     };
 
     function start() {
@@ -223,7 +222,7 @@ var app = (function () {
 
         /* Ambientes Licht: In alle Richtungen gleichmäßig zurückgestreutes Umgebungslicht, hellt Modell gleichmäßig auf. */
         // ka = Wie Material mit Ambient-Licht interagiert. Wie hell Umgebung allgemein, als RGB Wert
-        material.ka = material.ka || [0.6, 0.6, 0.6];
+        material.ka = material.ka || [0.3, 0.3, 0.3];
 
         /* Diffuse Reflexion: 
         Licht wird an der Modelloberfläche in alle Richtungen gestreut.
@@ -233,7 +232,7 @@ var app = (function () {
 
         // kd = Wie Material mit Diffuser Reflexion interagiert, als RGB Wert 
 
-        material.kd = material.kd || [0.9, 0.9, 0.9];
+        material.kd = material.kd || [0.6, 0.6, 0.6];
 
         /* Spekulare Reflexion: Das Licht das in Richtung des Reflexionsvektors gespiegelt wird.
          Wird nur von der Kamera aufgenommen, wenn die Kamera ungefähr in Richtung des Reflexionsvektors befindet.
@@ -256,7 +255,16 @@ var app = (function () {
      */
     function initModels() {
 
-        var mDefault = createPhongMaterial(); //create default material
+        //Create materials
+        var defaultMaterial = createPhongMaterial();
+        var redMaterial = createPhongMaterial({ kd: [1., 0., 0.] });
+        var greenMaterial = createPhongMaterial({ kd: [0., 1., 0.] });
+        var blueMaterial = createPhongMaterial({ kd: [0., 0., 1.] });
+        var whiteMaterial = createPhongMaterial({
+            ka: [1., 1., 1.],
+            kd: [.5, .5, .5],
+            ks: [0., 0., 0.] //keine spekular Reflexion für Boden
+        });
 
         // fill-style
         let fw = "fillwireframe";
@@ -264,13 +272,11 @@ var app = (function () {
         let w = "wireframe"
         let white = [1, 1, 1, 1];
 
-        //Torus und Kreis in Mitte
-        createModel("torus", fw, white, [0, 0.5, 0], [0, 0, 0], [1, 1, 1], mDefault);
-        createModel("sphere", f, white, [0, 0.5, 0], [0, 0, 0], [.1, .1, .1], mDefault);
-        createModel("icosahedron", f, white, [-0.5, .5, .8], [0, 0, 0], [.2, .2, .2], mDefault);
-
+        createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], redMaterial);
+        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], greenMaterial);
+        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], blueMaterial);
         //Boden
-        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], mDefault);
+        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], whiteMaterial);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -471,7 +477,7 @@ var app = (function () {
         camera.projectionType = "perspective";
         camera.lrtb = 2;
         camera.zAngle = 0;
-        camera.distance = 2;
+        camera.distance = 4;
         camera.eye = [0, 1, 4];
         camera.center = [0, 0, 0]
 

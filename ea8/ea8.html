@@ -69,12 +69,7 @@
             // Richtung der Lichtquelle (s) berechnen: Position der Lichtquelle - Position des Punktes.  
             vec3 s = normalize(l.position - p); //Richtung von Quelle zum Punkt (normiert)
 
-            // Richtung des reflektierten Lichts (Reflexionsvektor r) berechnen, mit der reflect() Funktion von GLSL.
-            // Vorzeichen von s umdrehen, damit r von dem Oberflächenpunkt p weg zeigt. 
-            vec3 r = reflect(-s, n); 
-            
-            
-
+           
             // BERECHNUNG DIFFUSE REFLEKTION 
             float sn = max( dot(s,n), 0.0); // Richtungsvektor des Lichts und Normale skalar multiplizieren.         
             // max() -> Nur positive Werte werden berücksichtigt, ansonsten werden Backfaces beleuchtet. 
@@ -87,8 +82,11 @@
 			
 
             // BERECHNUNG SPEKULARE REFLEKTION
+            // Richtung des reflektierten Lichts (Reflexionsvektor r) berechnen, mit der reflect() Funktion von GLSL.
+            vec3 r = reflect(-s, n); // Vorzeichen von s umdrehen, damit r von dem Oberflächenpunkt p weg zeigt. 
+
             float rv = max( dot(r,v), 0.0); // Lichtrichtung und Kamerarichtung skalar multiplizieren.
-              /* rv = ein Wert zwischen 0 und 1. Wenn man diesen cos() nimmt, erhält man den Winkel zischen Lichtrichtung und Kamerarichtung.
+              /* rv = ein Wert zwischen 0 und 1. Wenn man diesen cos() nimmt, erhält man den Winkel zischen Reflexionsrichtung und Kamerarichtung.
                 1 = Vektoren sind parallel
                 0 = Vektoren stehen senkrecht aufeinander.
             */

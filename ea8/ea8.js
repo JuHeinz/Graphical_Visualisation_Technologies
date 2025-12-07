@@ -7,7 +7,7 @@ var app = (function () {
     // The shader program object is also used to store attribute and uniform locations.
     var prog;
 
-    // Array of model objectst to render in this scene.
+    // Array of model objects to render in this scene.
     var models = [];
 
     var camera = {
@@ -61,9 +61,8 @@ var app = (function () {
 
     // Positionen für die Umlaufbahn der Lichter erstellen. 
     let n = 32;
-
-    let circlePositions = generatePositionsInCircle(32)
-    let startIndex = Math.floor(n * 0.5) //Die Hälfre von n
+    let circlePositions = generatePositionsInCircle(n)
+    let startIndex = Math.floor(n * 0.5) //Die Hälfte von n
 
     // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
     var illumination = {
@@ -260,15 +259,19 @@ var app = (function () {
      * Ursprüngliche Transformation, Rotation und Skalierung festlegen.
      */
     function initModels() {
+
+        let dark = convertRGB(33, 37, 41);
+
         //Create materials
         var defaultMaterial = createPhongMaterial();
         var redMaterial = createPhongMaterial({ kd: [1., 0., 0.] });
-        var greenMaterial = createPhongMaterial({ kd: [0., 1., 0.] });
-        var blueMaterial = createPhongMaterial({ kd: [0., 0., 1.] });
-        var whiteMaterial = createPhongMaterial({
-            ka: [1., 1., 1.],
-            kd: [.5, .5, .5],
-            ks: [0., 0., 0.] //keine spekular Reflexion für Boden
+        var darkMaterial = createPhongMaterial({ kd: dark });
+        var shinyMaterial = createPhongMaterial({
+            ks: [1, 1, 1],
+            ke: 20,
+        });
+        var dullMaterial = createPhongMaterial({
+            ks: [0., 0., 0.] //keine spekular Reflexion
         });
 
         // fill-style
@@ -277,11 +280,12 @@ var app = (function () {
         let w = "wireframe"
         let white = [1, 1, 1, 1];
 
+
         createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
-        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
-        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
+        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
         //Boden
-        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], whiteMaterial);
+        createModel("plane", fw, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], dullMaterial);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -713,6 +717,7 @@ var app = (function () {
     /**
      * Setze x und z Position der Lichtquellen.
      * @param {*} light Lichtquelle, die gerade bearbeitet wird.
+     * @param {*} sign ob Position erhöht oder verringert werden soll.
      */
     function updateLightPosition(light, sign) {
         let curCircleIndex = light.circleIndex;
@@ -721,7 +726,7 @@ var app = (function () {
         //neuer Index berechnen.
         let newIndex = curCircleIndex + sign;
 
-        if (newIndex > n) {
+        if (newIndex >= n) {
             newIndex = 0
         }
 

@@ -59,6 +59,17 @@ var app = (function () {
         distance: 2,
     };
 
+    // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
+    var illumination = {
+        ambientLight: [.5, .5, .5],
+        //Array aus Punktlichtquellen
+        light: [{
+            isOn: true,
+            position: [3., 1., 3.],
+            color: [1., 1., 1.]
+        },]
+    };
+
     function start() {
         init();
         render();
@@ -158,7 +169,8 @@ var app = (function () {
     }
 
     /**
-     * Die uniformen Projektions-Matrix und die Model-View-Matrix im Shader-Programm finden und dem js Object prog als Attribute hinzufügen.
+     * Uniform-Variablen an Shader Programme übergeben.
+     * Die uniformen z.B. Projektions-Matrix und die Model-View-Matrix im Shader-Programm finden und dem js Object prog als Attribute hinzufügen.
      * uniform -> Alle Vertices / Fragments werden mit den gleichen Werten bearbeitet, read-only. Ändert sich nicht von Vertex zu Vertex. 
      */
     function initUniforms() {
@@ -176,6 +188,66 @@ var app = (function () {
         //Normals
         prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
 
+        // Light.
+        prog.ambientLightUniform = gl.getUniformLocation(prog, "ambientLight");
+
+        // Array for light sources uniforms.
+        prog.lightUniform = [];
+        // Loop over light sources.
+        for (var j = 0; j < illumination.light.length; j++) {
+            var lightNb = "light[" + j + "]";
+            // Store one object for every light source.
+            var l = {};
+            l.isOn = gl.getUniformLocation(prog, lightNb + ".isOn");
+            l.position = gl.getUniformLocation(prog, lightNb + ".position");
+            l.color = gl.getUniformLocation(prog, lightNb + ".color");
+            prog.lightUniform[j] = l;
+        }
+
+        // Material.
+        prog.materialKaUniform = gl.getUniformLocation(prog, "material.ka");
+        prog.materialKdUniform = gl.getUniformLocation(prog, "material.kd");
+        prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
+        prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
+
+    }
+
+    /**
+     * Create a Material. Default: Grey, slightly reflective. 
+     * @param {*} material object with optional ka, kd, ks, ke
+     * @returns object with ka, kd, ks, ke. Set to default values if not supplied by param.
+     */
+    function createPhongMaterial(material) {
+        material = material || {};
+        // Das Phong Modell unterscheidet zwischen Ambienten, Diffusem und Spekularem Licht.
+
+        /* Ambientes Licht: In alle Richtungen gleichmäßig zurückgestreutes Umgebungslicht, hellt Modell gleichmäßig auf. */
+        // ka = Wie Material mit Ambient-Licht interagiert. Wie hell Umgebung allgemein, als RGB Wert
+        material.ka = material.ka || [0.6, 0.6, 0.6];
+
+        /* Diffuse Reflexion: 
+        Licht wird an der Modelloberfläche in alle Richtungen gestreut.
+        Die Streuung ist unabhängig davon, aus welcher Richtung es kommt.
+        Die einfallende Lichtmenge ist vom Lichteinfallswinkel (berechnet aus Richtungsvektor des Lichts und Normalen im Shader) abhängig.
+        Diffuses Licht zeigt die Konturen.*/
+
+        // kd = Wie Material mit Diffuser Reflexion interagiert, als RGB Wert 
+
+        material.kd = material.kd || [0.9, 0.9, 0.9];
+
+        /* Spekulare Reflexion: Das Licht das in Richtung des Reflexionsvektors gespiegelt wird.
+         Wird nur von der Kamera aufgenommen, wenn die Kamera ungefähr in Richtung des Reflexionsvektors befindet.
+         Spekulare Reflexion setzt Glanzpunkte.*/
+
+        // kd = Wie Material mit Spekularer Reflexion interagiert, als RGB Wert
+        material.ks = material.ks || [0.8, 0.8, 0.8];
+
+        /* Shininess */
+        /* ke = Shininess als integer >= 1 */
+
+        material.ke = material.ke || 10.;
+
+        return material;
     }
 
     /**
@@ -183,56 +255,25 @@ var app = (function () {
      * Ursprüngliche Transformation, Rotation und Skalierung festlegen.
      */
     function initModels() {
+
+        var mDefault = createPhongMaterial(); //create default material
+
         // fill-style
         let fw = "fillwireframe";
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
 
-        let sT = 1 / 4 // Size Torus
-        let sC = 1 / 100; //Size Sphere
-
-        for (let i = -10; i < 10; i++) {
-            let x = i;
-            let y = 0;  //Höhe
-            let z = i; //Tiefe
-
-            let xCirc = Math.sin(i)
-            let yCirc = Math.cos(i)
-            let rotate = Math.PI / Math.abs(i + 0.1)
-            console.log(rotate)
-
-
-            //Sinuskurve aus Icosahedron
-            createModel("icosahedron", fw, white, [i, Math.sin(i), -8], [0, rotate, 0], [.1, .1, .1]);
-            createModel("icosahedron", fw, white, [i + .5, Math.sin(i + .5), -8], [0, rotate, 0], [.1, .1, .1]);
-
-
-            //Kreis aus Torus
-            createModel("torus", fw, white, [xCirc, .5, yCirc], [0, 0, 0], [sT, sT, sT]);
-
-            //Kreis aus Kugeln
-            createModel("sphere", fw, white, [xCirc, .5, yCirc], [0, 0, 0], [sC, sC, sC]);
-
-
-
-        }
-
-        let radiant = -Math.PI / 3
-
         //Torus und Kreis in Mitte
-        createModel("torus", fw, white, [0, 0.5, 0], [radiant, radiant, 0], [1, 1, 1]);
-        createModel("sphere", fw, white, [0, 0.5, 0], [0, 0, 0], [.1, .1, .1]);
-
-
-        createModel("icosahedron", fw, white, [-1.5, .50, .8], [0, 0, 0], [.2, .2, .2]);
-        createModel("icosahedron", fw, white, [1.5, .50, .8], [0, 0, 0], [.2, .2, .2]);
-
-
+        createModel("torus", fw, white, [0, 0.5, 0], [0, 0, 0], [1, 1, 1], mDefault);
+        createModel("sphere", f, white, [0, 0.5, 0], [0, 0, 0], [.1, .1, .1], mDefault);
+        createModel("icosahedron", f, white, [-0.5, .5, .8], [0, 0, 0], [.2, .2, .2], mDefault);
 
         //Boden
-        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3]);
+        createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], mDefault);
 
+        // Select one model that can be manipulated interactively by user.
+        interactiveModel = models[0];
     }
 
     /**
@@ -241,12 +282,13 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle, color, translate, rotate, scale) {
+    function createModel(geometryname, fillstyle, color, translate, rotate, scale, material) {
         var model = {};
         model.fillstyle = fillstyle;
 
         model.geometry = geometryname; // store name so we can update it later
         model.color = color;
+        model.material = material;
 
         initDataAndBuffers(model, geometryname);
 
@@ -454,8 +496,31 @@ var app = (function () {
         // Set view matrix depending on camera attributes.
         mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
-        // Loop over models.
 
+        // SET LIGHT UNIFORMS
+        // Ambient Light in das Programm (und somit den Shader) übergeben.
+        gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
+
+        // Set uniforms for every light in light array
+        for (var j = 0; j < illumination.light.length; j++) {
+
+            let currentLight = illumination.light[j];
+
+            gl.uniform1i(prog.lightUniform[j].isOn, currentLight.isOn); // (bool wird zu int übersetzt)
+
+            /* Licht-Position in Relation zur View Matrix berechnen, also zu eye-coordinates tranformieren. */
+            var lightPos = [].concat(currentLight.position); // Copy current light position into a new array.
+            lightPos.push(1.0); // Vierte Koordinate hinzufügen die für Transformation gebraucht wird.
+            vec4.transformMat4(lightPos, lightPos, camera.vMatrix); //Transformation durchführen
+            lightPos.pop(); // Vierte Koordinate wieder entfernen. 
+
+
+            // Light position und color in das Programm (und somit den Shader) übergeben.
+            gl.uniform3fv(prog.lightUniform[j].position, lightPos);
+            gl.uniform3fv(prog.lightUniform[j].color, currentLight.color);
+        }
+
+        // Loop over models.
         for (var i = 0; i < models.length; i++) {
             updateTransformations(models[i]);
 
@@ -468,6 +533,12 @@ var app = (function () {
 
             // Normal-Matrix, die im model Object gespeichert wird, in das Programm (und somit den Shader) übergeben.
             gl.uniformMatrix3fv(prog.nMatrixUniform, false, models[i].nMatrix);
+
+            // Material-Eigenschaften, die im model Object gespeichert werden, in das Programm (und somit den Shader) übergeben.
+            gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
+            gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
+            gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
+            gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
 
             //ZEICHNEN DER MODELLE
             draw(models[i]);

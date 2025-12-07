@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="dark">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>EA 8 | Graphical Visualisation Technologies</title>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="../styles.css">
+        <link rel="stylesheet" href="./ea8.css">
+        <script src="../ext/gl-matrix.js"></script>
+        <script src="../models/vertexData_torus.js"></script>
+        <script src="../models/vertexData_plane.js"></script>
+        <script src="../models/vertexData_sphere.js"></script>
+        <script src="../models/vertexData_icosahedron.js"></script>
+
+        <script src="./ea8.js"></script>
+
+        <!--VERTEX SHADER-->
+        <script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+            uniform vec4 uColor;            
+            uniform mat3 uNMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+	            vec3 tNormal = uNMatrix * aNormal;
+                vColor = uColor;
+
+			}
+		</script>
+
+        <!--FRAGMENT SHADER-->
+        <script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+                float z = gl_FragCoord.z;
+                vec4 newCol = vec4(z, z, z, z);
+                gl_FragColor = newCol;
+			}
+		</script>
+
+    </head>
+
+    <body onload="app.start()">
+
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary" id="global-nav">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Graphical Visualisation Technologies</a>
+
+                    <div class="navbar-nav">
+                        <a class="nav-link " href="../index.html">Aufgabenübersicht</a>
+                    </div>
+
+                </div>
+            </nav>
+
+            <div class="title-section">
+                <h1 class="display-5">Einsendeaufgabe 8</h1>
+                <p class="lead">
+                    Lichter auf einer Kreisbahn mit Toon Shading
+                </p>
+            </div>
+
+        </header>
+
+        <main>
+            <canvas id="canvas"></canvas>
+
+            <div class="controls">
+                <div>
+                    <h2 class="h3 fw-light">Kamera Interaktion</h2>
+
+                    <ul class="list-group-flush">
+                        <li class="list-group-item">
+                            <span class="badge text-bg-dark"><code>W,S</code></span>
+                            auf Y-Ebene bewegen
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge text-bg-dark"><code>A,D</code></span>
+                            auf X-Ebene bewegen
+                        </li>
+                        <li class="list-group-item"> <span class="badge text-bg-dark"><code>Pfeiltasten</code></span>
+                            Kamera kreisen </li>
+                        <li class="list-group-item">
+                            <span class="badge text-bg-dark"><code>(Shift) + n</code></span> Kamera Distanz ändern
+                        </li>
+                        <li class="list-group-item"><span class="badge text-bg-dark">
+                                <code>p</code> , <code>o</code> , <code>f</code></span> Projektion
+                            umschalten. </li>
+                        <li class="list-group-item"> <span class="badge text-bg-dark"><code>r</code></span> Reset</li>
+                    </ul>
+
+                </div>
+
+                <div>
+                    <h2 class="h3 fw-light">Benutzerhinweis</h2>
+
+                    <p>Nach Ändern der ViewPort-Größe (z.B. durch Öffnen der Dev-Tools oder Resizing des Fensters)
+                        muss die Seite neu geladen werden, damit die Canvas scharf erscheint.</p>
+                </div>
+
+                <div>
+                    <h2 class="h3 fw-light">Dokumentation</h2>
+
+                    <p>Die Vertex-Daten für das Icosahedron stammen aus dem Tutorial für Recursive Spheres von <a
+                            href="http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html">Andreas
+                            Kahler</a></p>
+                </div>
+            </div>
+
+        </main>
+
+        <footer>
+            <p class="text-body-secondary">Julia Heinzelmann</p>
+            <p class="text-body-secondary">Berliner Hochschule für Technik </p>
+            <p class="text-body-secondary"> <a
+                    href="https://github.com/JuHeinz/Graphical_Visualisation_Technologies">Gitub Repository</a></p>
+        </footer>
+
+    </body>
+
+</html>

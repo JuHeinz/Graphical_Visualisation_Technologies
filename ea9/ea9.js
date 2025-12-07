@@ -186,11 +186,11 @@ var app = (function () {
         // Bestimmt die Kamera-Position, bzw die Modell-Position.
         prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
 
-        //Farbe
-        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
-
         //Normals
         prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
+
+        //Farbe
+        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
 
         // Light.
         prog.ambientLightUniform = gl.getUniformLocation(prog, "ambientLight");
@@ -214,41 +214,62 @@ var app = (function () {
         prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
         prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
 
+        // Texture.
+        prog.textureUniform = gl.getUniformLocation(prog, "uTexture");
+
     }
 
     /**
-     * Create a Material. Default: Grey, slightly reflective. 
-     * @param {*} material object with optional ka, kd, ks, ke
-     * @returns object with ka, kd, ks, ke. Set to default values if not supplied by param.
-     */
+   * Load the texture image file.
+   */
+    function initTexture(model, filename) {
+        var texture = gl.createTexture();
+        model.texture = texture;
+        texture.loaded = false;
+        texture.image = new Image();
+        texture.image.onload = function () {
+            onloadTextureImage(texture);
+        };
+        texture.image.src = filename;
+    }
+
+    function onloadTextureImage(texture) {
+
+        texture.loaded = true;
+
+        // Use texture object.
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        // Assigen image data.
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
+            texture.image);
+
+        // Set texture parameter.
+        // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        // Mag Filter: NEAREST,LINEAR
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        // Use mip-Mapping.
+        gl.generateMipmap(gl.TEXTURE_2D);
+
+        // Release texture object.
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        // Update the scene.
+        render();
+    }
+
+    /**
+    * @paramter material : objekt with optional ka, kd, ks, ke.
+    * @retrun material : objekt with ka, kd, ks, ke.
+    */
     function createPhongMaterial(material) {
         material = material || {};
-        // Das Phong Modell unterscheidet zwischen Ambienten, Diffusem und Spekularem Licht.
-
-        /* Ambientes Licht: In alle Richtungen gleichmäßig zurückgestreutes Umgebungslicht, hellt Modell gleichmäßig auf. */
-        // ka = Wie Material mit Ambient-Licht interagiert. Wie hell Umgebung allgemein, als RGB Wert
-        material.ka = material.ka || [0.4, 0.4, 0.4];
-
-        /* Diffuse Reflexion: 
-        Licht wird an der Modelloberfläche in alle Richtungen gestreut.
-        Die Streuung ist unabhängig davon, aus welcher Richtung es kommt.
-        Die einfallende Lichtmenge ist vom Lichteinfallswinkel (berechnet aus Richtungsvektor des Lichts und Normalen im Shader) abhängig.
-        Diffuses Licht zeigt die Konturen.*/
-
-        // kd = Wie Material mit Diffuser Reflexion interagiert, als RGB Wert 
-
+        // Set some default values,
+        // if not defined in material paramter.
+        material.ka = material.ka || [0.3, 0.3, 0.3];
         material.kd = material.kd || [0.6, 0.6, 0.6];
-
-        /* Spekulare Reflexion: Das Licht das in Richtung des Reflexionsvektors gespiegelt wird.
-         Wird nur von der Kamera aufgenommen, wenn die Kamera ungefähr in Richtung des Reflexionsvektors befindet.
-         Spekulare Reflexion setzt Glanzpunkte.*/
-
-        // kd = Wie Material mit Spekularer Reflexion interagiert, als RGB Wert
         material.ks = material.ks || [0.8, 0.8, 0.8];
-
-        /* Shininess */
-        /* ke = Shininess als integer >= 1 */
-
         material.ke = material.ke || 10.;
 
         return material;
@@ -264,8 +285,7 @@ var app = (function () {
 
         //Create materials
         var defaultMaterial = createPhongMaterial();
-        var redMaterial = createPhongMaterial({ kd: [1., 0., 0.] });
-        var darkMaterial = createPhongMaterial({ kd: dark });
+
         var shinyMaterial = createPhongMaterial({
             ks: [1, 1, 1],
             ke: 20,
@@ -279,13 +299,20 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
+        let texturePath = "../textures/x.png"
 
+        var greyMaterial = createPhongMaterial({
+            ka: [1., 1., 1.],
+            kd: [.5, .5, .5],
+            ks: [0., 0., 0.]
+        });
 
-        createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
-        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
-        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+        //createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
+        //createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+        //createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
         //Boden
-        createModel("plane", fw, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], dullMaterial);
+        createModel("plane", f, [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0,
+            0], [1, 1, 1, 1], greyMaterial, texturePath);
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -297,17 +324,20 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
-    function createModel(geometryname, fillstyle, color, translate, rotate, scale, material) {
+    function createModel(geometryname, fillstyle, color, translate, rotate, scale, material, textureFilename) {
         var model = {};
         model.fillstyle = fillstyle;
-
-        model.geometry = geometryname; // store name so we can update it later
         model.color = color;
-        model.material = material;
 
         initDataAndBuffers(model, geometryname);
-
         initTransformations(model, translate, rotate, scale);
+
+        if (textureFilename) {
+            initTexture(model, textureFilename);
+        }
+
+        model.material = material;
+
 
         models.push(model);
     }
@@ -339,17 +369,19 @@ var app = (function () {
      * @parameter geometryname: string with name of geometry.
      */
     function initDataAndBuffers(model, geometryname) {
-        //Dem Model die vertices, indexes und normals geben, durch Aufruf der Funktion createVertexData
-        globalThis[geometryname].createVertexData.apply(model);
-
+        /// Provide model object with vertex data arrays.
+        // Fill data arrays for Vertex-Positions, Normals, Index data:
+        // vertices, normals, indicesLines, indicesTris;
+        // Pointer this refers to the window.
+        this[geometryname]['createVertexData'].apply(model);
 
         // Setup position vertex buffer object.
         model.vboPos = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos); // Tell gl that all coming comands should refer to this buffer.
-        gl.bufferData(gl.ARRAY_BUFFER, model.vertices, gl.STATIC_DRAW); // Copy data vom the js-Array to the buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
+        gl.bufferData(gl.ARRAY_BUFFER, model.vertices, gl.STATIC_DRAW);
         // Bind vertex buffer to attribute variable.
-        prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition'); // Look up where the Vertex Data needs to go
-        gl.enableVertexAttribArray(prog.positionAttrib); //Supply data from the vboPos buffer to the attribute "aPosition"
+        prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
+        gl.enableVertexAttribArray(prog.positionAttrib);
 
         // Setup normal vertex buffer object.
         model.vboNormal = gl.createBuffer();
@@ -359,17 +391,28 @@ var app = (function () {
         prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
         gl.enableVertexAttribArray(prog.normalAttrib);
 
+        // Setup texture coordinate vertex buffer object.
+        model.vboTextureCoord = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+        gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
+        // Bind buffer to attribute variable.
+        prog.textureCoordAttrib = gl
+            .getAttribLocation(prog, 'aTextureCoord');
+        gl.enableVertexAttribArray(prog.textureCoordAttrib);
+
         // Setup lines index buffer object.
         model.iboLines = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesLines, gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesLines,
+            gl.STATIC_DRAW);
         model.iboLines.numberOfElements = model.indicesLines.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
         // Setup triangle index buffer object.
         model.iboTris = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesTris, gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesTris,
+            gl.STATIC_DRAW);
         model.iboTris.numberOfElements = model.indicesTris.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
@@ -541,6 +584,11 @@ var app = (function () {
 
         // Loop over models.
         for (var i = 0; i < models.length; i++) {
+
+            if (!models[i].texture.loaded) {
+                continue;
+            }
+
             updateTransformations(models[i]);
 
             //UNIFORMS AUS DEM MODEL HOLEN UND IM SHADER SETZEN
@@ -558,6 +606,11 @@ var app = (function () {
             gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
             gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
             gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
+
+            // Texture.
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
+            gl.uniform1i(prog.textureUniform, 0);
 
             //ZEICHNEN DER MODELLE
             draw(models[i]);
@@ -639,6 +692,10 @@ var app = (function () {
         // Setup normal VBO.
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
         gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
+
+        // Setup texture VBO.
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+        gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false, 0, 0);
 
         // Setup rendering tris.
         var fill = (model.fillstyle.search(/fill/) != -1);

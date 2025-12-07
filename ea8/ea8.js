@@ -59,13 +59,19 @@ var app = (function () {
         distance: 4,
     };
 
+    // Positionen für die Umlaufbahn der Lichter erstellen. 
+    let n = 6;
+
+    let circlePositions = generatePositionsInCircle(6)
+    let startIndex = Math.floor(n * 0.5) //Die Hälfre von n
+
     // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
     var illumination = {
         ambientLight: [.5, .5, .5],
         //Array aus Punktlichtquellen
         light: [
-            { isOn: true, position: [3., 1., 3.], color: [1., 1., 1.] },
-            { isOn: true, position: [-3., 1., -3.], color: [.2, 1., 1.] },
+            { isOn: true, position: [3., 1., 3], color: convertRGB(10, 101, 247), circleIndex: 0 }, //blue light
+            { isOn: false, position: [-3., 1., 3], color: convertRGB(247, 121, 10), circleIndex: startIndex }, //orange light
         ]
     };
 
@@ -254,7 +260,6 @@ var app = (function () {
      * Ursprüngliche Transformation, Rotation und Skalierung festlegen.
      */
     function initModels() {
-
         //Create materials
         var defaultMaterial = createPhongMaterial();
         var redMaterial = createPhongMaterial({ kd: [1., 0., 0.] });
@@ -271,10 +276,11 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
+        createModel("sphere", f, white, [0, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
 
-        createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], redMaterial);
-        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], greenMaterial);
-        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], blueMaterial);
+        //createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
+        //createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
+        //createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
         //Boden
         createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], whiteMaterial);
 
@@ -409,11 +415,16 @@ var app = (function () {
                 case ('r'):
                     resetCamera()
                     break;
+                case ('l'):
+                    changeLightsPosition(1)
+                    break;
+                case ('L'):
+                    changeLightsPosition(-1)
+                    break;
 
             }
         };
     }
-
 
 
     /**
@@ -498,7 +509,6 @@ var app = (function () {
         setProjection(); //Kamera-Pojektion ggf neu setzen, z.B. wenn nach einem User Input neu gerendert werden soll. 
 
         calculateCameraOrbit() //Camera.eye ggf. neu berechnen. z.B. wenn nach einem User Input neu gerendert werden soll. 
-
         // Set view matrix depending on camera attributes.
         mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
@@ -662,15 +672,83 @@ var app = (function () {
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
     }
 
+
+
+
+    /**
+     * Erstellt ein Array an n Positionen auf einem Kreis.
+     */
+    function generatePositionsInCircle(n) {
+        let positions = [];
+        var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
+        var dt = circle_Umfang / n; //dt = Schrittweite. 
+        var t = 0;
+        var r = 2;
+
+        for (var i = 0; i <= n - 1; i++, t += dt) {
+            //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.
+            var x = r * Math.cos(t); // X-Wert an Stelle t berechnen
+            var z = r * Math.sin(t); // Z-Wert an Stelle t berechnen
+
+            positions.push([x, .5, z]);
+        }
+
+        return positions;
+    }
+
+
+    /**
+     * Licht rotieren. 
+     * @param {} sign -1 = CW, 1 = CCW
+     */
+    function changeLightsPosition(sign) {
+
+        let light1 = illumination.light[0];
+        let light2 = illumination.light[1];
+
+        updateLightPosition(light1);
+        //updateLightPosition(light2);
+        render()
+    }
+
+    /**
+     * Setze x und z Position der Lichtquellen.
+     * @param {*} light Lichtquelle, die gerade bearbeitet wird.
+     */
+    function updateLightPosition(light) {
+        let curCircleIndex = light.circleIndex;
+
+        if (curCircleIndex >= circlePositions.length) {
+            curCircleIndex = 0
+        }
+
+        //Setze neue Position des Lichts an Stelle des Index.
+        light.position = circlePositions[curCircleIndex];
+        curCircleIndex++
+        //geupdater index an das Licht-Object überreichen.
+        light.circleIndex = curCircleIndex;
+        console.log(curCircleIndex)
+    }
+
     /*
     RGBA Farben von Wertebereich [0,255] zu Wertebereich[0,1] transformieren.
     */
-    function convertRGB(r, g, b, a) {
+    function convertRGBA(r, g, b, a) {
         var r_new = r / 255;
         var g_new = g / 255
         var b_new = b / 255
         var a_new = a / 255
-        return []
+        return [r_new, g_new, b_new, a_new]
+    }
+
+    /*
+ RGB Farben von Wertebereich [0,255] zu Wertebereich[0,1] transformieren.
+ */
+    function convertRGB(r, g, b) {
+        var r_new = r / 255;
+        var g_new = g / 255
+        var b_new = b / 255
+        return [r_new, g_new, b_new]
     }
 
     // App interface.

@@ -60,9 +60,9 @@ var app = (function () {
     };
 
     // Positionen für die Umlaufbahn der Lichter erstellen. 
-    let n = 6;
+    let n = 32;
 
-    let circlePositions = generatePositionsInCircle(6)
+    let circlePositions = generatePositionsInCircle(32)
     let startIndex = Math.floor(n * 0.5) //Die Hälfre von n
 
     // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
@@ -70,8 +70,8 @@ var app = (function () {
         ambientLight: [.5, .5, .5],
         //Array aus Punktlichtquellen
         light: [
-            { isOn: true, position: [3., 1., 3], color: convertRGB(10, 101, 247), circleIndex: 0 }, //blue light
-            { isOn: false, position: [-3., 1., 3], color: convertRGB(247, 121, 10), circleIndex: startIndex }, //orange light
+            { isOn: true, position: circlePositions[0], color: convertRGB(10, 101, 247), circleIndex: 0 }, //blue light
+            { isOn: true, position: circlePositions[startIndex], color: convertRGB(247, 121, 10), circleIndex: startIndex }, //orange light
         ]
     };
 
@@ -276,11 +276,10 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
-        createModel("sphere", f, white, [0, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
 
-        //createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
-        //createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
-        //createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
+        createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
+        createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
+        createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], defaultMaterial);
         //Boden
         createModel("plane", w, white, [0, 0, 0], [0, 0, 0], [3, 3, 3], whiteMaterial);
 
@@ -706,8 +705,8 @@ var app = (function () {
         let light1 = illumination.light[0];
         let light2 = illumination.light[1];
 
-        updateLightPosition(light1);
-        //updateLightPosition(light2);
+        updateLightPosition(light1, sign);
+        updateLightPosition(light2, sign);
         render()
     }
 
@@ -715,19 +714,27 @@ var app = (function () {
      * Setze x und z Position der Lichtquellen.
      * @param {*} light Lichtquelle, die gerade bearbeitet wird.
      */
-    function updateLightPosition(light) {
+    function updateLightPosition(light, sign) {
         let curCircleIndex = light.circleIndex;
+        let n = circlePositions.length;
 
-        if (curCircleIndex >= circlePositions.length) {
-            curCircleIndex = 0
+        //neuer Index berechnen.
+        let newIndex = curCircleIndex + sign;
+
+        if (newIndex > n) {
+            newIndex = 0
         }
 
+        if (newIndex < 0) {
+            newIndex = n - 1;
+        }
+
+
         //Setze neue Position des Lichts an Stelle des Index.
-        light.position = circlePositions[curCircleIndex];
-        curCircleIndex++
+        light.position = circlePositions[newIndex];
+
         //geupdater index an das Licht-Object überreichen.
-        light.circleIndex = curCircleIndex;
-        console.log(curCircleIndex)
+        light.circleIndex = newIndex;
     }
 
     /*

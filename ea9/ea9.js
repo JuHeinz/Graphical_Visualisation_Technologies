@@ -322,9 +322,9 @@ var app = (function () {
             ks: [0., 0., 0.]
         });
 
-        createModel("sphere", f, white, [0, 1, 0], [0, 0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "Earth.png");
+        createModel("sphere", f, white, [-2, 1, 0], [0, 0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "test.png");
 
-        //createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+        createModel("torus", f, white, [0, 1, 0], [0, 0, 0, 0], [2, 2, 2], shinyMaterial, texturePath + "test.png");
 
         //Boden
         createModel("plane", f, white, [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], greyMaterial, texturePath + "Grass_04.png");

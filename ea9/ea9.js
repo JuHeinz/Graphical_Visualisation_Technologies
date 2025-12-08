@@ -314,7 +314,7 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
-        let texturePath = "../textures/Grass_04.png"
+        let texturePath = "../textures/"
 
         var greyMaterial = createPhongMaterial({
             ka: [1., 1., 1.],
@@ -322,12 +322,12 @@ var app = (function () {
             ks: [0., 0., 0.]
         });
 
-        //createModel("torus", f, white, [0, .75, 0], [0, 0, 0], [1, 1, 1], defaultMaterial);
-        //createModel("sphere", f, white, [-1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+        createModel("sphere", f, white, [0, 1, 0], [0, 0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "Earth.png");
+
         //createModel("sphere", f, white, [1.25, .5, 0], [0, 0, 0, 0], [.5, .5, .5], shinyMaterial);
+
         //Boden
-        createModel("plane", f, [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0,
-            0], [1, 1, 1, 1], greyMaterial, texturePath);
+        createModel("plane", f, white, [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], greyMaterial, texturePath + "Grass_04.png");
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];

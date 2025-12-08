@@ -233,6 +233,9 @@ var app = (function () {
         texture.image.src = filename;
     }
 
+    /**
+     * Bind texture to gl
+     */
     function onloadTextureImage(texture) {
 
         texture.loaded = true;
@@ -240,16 +243,24 @@ var app = (function () {
         // Use texture object.
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
-        // Assigen image data.
+        // Assign image data.
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
             texture.image);
 
         // Set texture parameter.
+
         // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        /* Minification settings: How to handle texture having a bigger resolution than model.
+            NEAREST: Mittellung wird nur über ein Textel (Texture Pixel) durchgeführt. Am wenigsten rechenintensiv.
+            LINEAR_MIPMAP_LINEAR: Mittellung über mehrere Texel.
+        */
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
         // Mag Filter: NEAREST,LINEAR
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        // Use mip-Mapping.
+        /* Maginification settings: How to handle model having more pixels than texture */
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        /* Mip Map erstellen: Verschiedene Auflösungen der gleichen Textur erstellen*/
         gl.generateMipmap(gl.TEXTURE_2D);
 
         // Release texture object.

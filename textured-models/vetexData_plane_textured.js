@@ -1,5 +1,5 @@
 // BEGIN exercise plane
-var plane = ( function() {
+var plane = (function () {
 
 	function createVertexData() {
 		var n = 100;
@@ -28,9 +28,9 @@ var plane = ( function() {
 		var iTris = 0;
 
 		// Loop u.
-		for(var i = 0, u = -10; i <= n; i++, u += du) {
+		for (var i = 0, u = -10; i <= n; i++, u += du) {
 			// Loop v.
-			for(var j = 0, v = -10; j <= m; j++, v += dv) {
+			for (var j = 0, v = -10; j <= m; j++, v += dv) {
 
 				var iVertex = i * (m + 1) + j;
 
@@ -47,26 +47,30 @@ var plane = ( function() {
 				normals[iVertex * 3] = 0;
 				normals[iVertex * 3 + 1] = 1;
 				normals[iVertex * 3 + 2] = 0;
-				
+
+				/* TEXTURE MAPPING: Textur Koordinaten bestimmen.
+				 u und v haben in diesem Modell einen Wertebereich [-10, 10]. 
+				 Die Texturkooridnaten s und t brauchen [0,1]. Deshalb (+10)/20 
+				*/
 				// Set texture coordinate.
-				textureCoord[iVertex * 2] = (u+10)/20; // s
-				textureCoord[iVertex * 2 + 1] = (v+10)/20; // t
+				textureCoord[iVertex * 2] = (u + 10) / 20; // s
+				textureCoord[iVertex * 2 + 1] = (v + 10) / 20; // t
 
 				// Set index.
 				// Line on beam.
-				if(j > 0 && i > 0) {
+				if (j > 0 && i > 0) {
 					indicesLines[iLines++] = iVertex - 1;
 					indicesLines[iLines++] = iVertex;
 				}
 				// Line on ring.
-				if(j > 0 && i > 0) {
+				if (j > 0 && i > 0) {
 					indicesLines[iLines++] = iVertex - (m + 1);
 					indicesLines[iLines++] = iVertex;
 				}
 
 				// Set index.
 				// Two Triangles.
-				if(j > 0 && i > 0) {
+				if (j > 0 && i > 0) {
 					indicesTris[iTris++] = iVertex;
 					indicesTris[iTris++] = iVertex - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
@@ -80,7 +84,7 @@ var plane = ( function() {
 	}
 
 	return {
-		createVertexData : createVertexData
+		createVertexData: createVertexData
 	};
 
 }());

@@ -109,9 +109,9 @@ var app = (function () {
      * be in render function.
      */
     function initPipline() {
-        var r = 52 / 255;
-        var g = 56 / 255
-        var b = 59 / 255
+        var r = 90 / 255;
+        var g = 146 / 255
+        var b = 237 / 255
 
         gl.clearColor(r, g, b, 1);
 
@@ -234,7 +234,7 @@ var app = (function () {
     }
 
     /**
-     * Bind texture to gl
+     * Bind texture to gl, set settings for texture like Magnification / Minifucation, Tiling-Rotation
      */
     function onloadTextureImage(texture) {
 
@@ -250,18 +250,22 @@ var app = (function () {
         // Set texture parameter.
 
         // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
-        /* Minification settings: How to handle texture having a bigger resolution than model.
+        /* Minification settings: How to handle texture having a bigger resolution than model. Zum Beispiel wenn die hinteren Kacheln der Plane angezeigt werden. 
             NEAREST: Mittellung wird nur über ein Textel (Texture Pixel) durchgeführt. Am wenigsten rechenintensiv.
             LINEAR_MIPMAP_LINEAR: Mittellung über mehrere Texel.
         */
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
         // Mag Filter: NEAREST,LINEAR
-        /* Maginification settings: How to handle model having more pixels than texture */
+        /* Maginification settings: How to handle model having more pixels than texture. Z,B, wenn die vorderen Kacheln der Plane angezeigt werden. */
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
         /* Mip Map erstellen: Verschiedene Auflösungen der gleichen Textur erstellen*/
         gl.generateMipmap(gl.TEXTURE_2D);
+
+        //Drehen der Kacheln, so dass sie nahtlos ineinander übergehen. 
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
 
         // Release texture object.
         gl.bindTexture(gl.TEXTURE_2D, null);
@@ -310,7 +314,7 @@ var app = (function () {
         let f = "fill";
         let w = "wireframe"
         let white = [1, 1, 1, 1];
-        let texturePath = "../textures/x.png"
+        let texturePath = "../textures/Grass_04.png"
 
         var greyMaterial = createPhongMaterial({
             ka: [1., 1., 1.],

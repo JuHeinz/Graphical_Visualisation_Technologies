@@ -48,13 +48,20 @@ var plane = (function () {
 				normals[iVertex * 3 + 1] = 1;
 				normals[iVertex * 3 + 2] = 0;
 
-				/* TEXTURE MAPPING: Textur Koordinaten bestimmen.
+				/* TEXTURE MAPPING: Textur Koordinaten bestimmen. */
+
+				/* Not Tileable 
 				 u und v haben in diesem Modell einen Wertebereich [-10, 10]. 
 				 Die Texturkooridnaten s und t brauchen [0,1]. Deshalb (+10)/20 
-				*/
+				
 				// Set texture coordinate.
 				textureCoord[iVertex * 2] = (u + 10) / 20; // s
 				textureCoord[iVertex * 2 + 1] = (v + 10) / 20; // t
+				*/
+
+				/* Tileable: Die Textur auf die Gesamte Fläche des Modells spannen. WebGL tiled dann automatisch.*/
+				textureCoord[iVertex * 2] = u; // s
+				textureCoord[iVertex * 2 + 1] = v; // t
 
 				// Set index.
 				// Line on beam.

@@ -66,10 +66,11 @@ var app = (function () {
 
     // Beleuchtung der Szene. Bestehend aus den Einstellungen für das Ambient-Light und verschiedene Punktlichtquellen. 
     var illumination = {
-        ambientLight: [.6, .6, .6],
+        ambientLight: [.8, .8, .8],
         //Array aus Punktlichtquellen
         light: [
-            { isOn: true, position: circlePositions[0], color: convertRGB(255, 255, 255), circleIndex: 0 },
+            { isOn: true, position: circlePositions[7], color: convertRGB(255, 239, 196), circleIndex: 7 },
+            //{ isOn: true, position: circlePositions[7], color: convertRGB(247, 121, 10), circleIndex: 7 },
         ]
     };
 
@@ -275,21 +276,42 @@ var app = (function () {
     }
 
     /**
-    * @paramter material : objekt with optional ka, kd, ks, ke.
-    * @retrun material : objekt with ka, kd, ks, ke.
-    */
+      * Create a Material. Default: Grey, slightly reflective. 
+      * @param {*} material object with optional ka, kd, ks, ke
+      * @returns object with ka, kd, ks, ke. Set to default values if not supplied by param.
+      */
     function createPhongMaterial(material) {
         material = material || {};
-        // Set some default values,
-        // if not defined in material paramter.
-        material.ka = material.ka || [0.3, 0.3, 0.3];
+        // Das Phong Modell unterscheidet zwischen Ambienten, Diffusem und Spekularem Licht.
+
+        /* Ambientes Licht: In alle Richtungen gleichmäßig zurückgestreutes Umgebungslicht, hellt Modell gleichmäßig auf. */
+        // ka = Wie Material mit Ambient-Licht interagiert. Wie hell Umgebung allgemein, als RGB Wert
+        material.ka = material.ka || [0.6, 0.6, 0.6];
+
+        /* Diffuse Reflexion: 
+        Licht wird an der Modelloberfläche in alle Richtungen gestreut.
+        Die Streuung ist unabhängig davon, aus welcher Richtung es kommt.
+        Die einfallende Lichtmenge ist vom Lichteinfallswinkel (berechnet aus Richtungsvektor des Lichts und Normalen im Shader) abhängig.
+        Diffuses Licht zeigt die Konturen.*/
+
+        // kd = Wie Material mit Diffuser Reflexion interagiert, als RGB Wert 
+
         material.kd = material.kd || [0.6, 0.6, 0.6];
+
+        /* Spekulare Reflexion: Das Licht das in Richtung des Reflexionsvektors gespiegelt wird.
+         Wird nur von der Kamera aufgenommen, wenn die Kamera ungefähr in Richtung des Reflexionsvektors befindet.
+         Spekulare Reflexion setzt Glanzpunkte.*/
+
+        // kd = Wie Material mit Spekularer Reflexion interagiert, als RGB Wert
         material.ks = material.ks || [0.8, 0.8, 0.8];
+
+        /* Shininess */
+        /* ke = Shininess als integer >= 1 */
+
         material.ke = material.ke || 10.;
 
         return material;
     }
-
     /**
      * Definieren, welche Models und mit welchem Stil gerendert werden sollen.
      * Ursprüngliche Transformation, Rotation und Skalierung festlegen.
@@ -300,6 +322,10 @@ var app = (function () {
 
         //Create materials
         var defaultMaterial = createPhongMaterial();
+
+        var myMaterial = createPhongMaterial({
+            kd: [0.8, 0.8, 0.8] //keine spekular Reflexion
+        });
 
         var shinyMaterial = createPhongMaterial({
             ks: [1, 1, 1],
@@ -316,20 +342,19 @@ var app = (function () {
         let white = [1, 1, 1, 1];
         let texturePath = "../textures/"
 
-        var greyMaterial = createPhongMaterial({
-            ka: [1., 1., 1.],
-            kd: [.5, .5, .5],
-            ks: [0., 0., 0.]
-        });
+        let rotationStep = Math.PI / 8;
 
-        //createModel("sphere", f, white, [-2, 1, 0], [0, 0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "test.png");
+        //Main Donut
+        createModel("torus", f, white, [0, 1, 0], [rotationStep * 6, rotationStep * 6, 0], [3, 3, 3], shinyMaterial, texturePath + "donut.png");
 
-        createModel("torus", f, white, [-3, 1.3, 0], [0, 0, 0], [3, 3, 3], shinyMaterial, texturePath + "donut.png");
-        createModel("torus", f, white, [0, 0.4, 0], [(Math.PI / 8) * 4, 0, 0], [3, 3, 3], shinyMaterial, texturePath + "donut.png");
-        createModel("torus", f, white, [3, 0.4, 0], [(Math.PI / 8) * 4, 0, 0], [3, 3, 3], shinyMaterial, texturePath + "test2.png");
+        //Standing Donut
+        createModel("torus", f, white, [-1, .6, 2.5], [0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "donut.png");
+
+        //Laying Donut
+        createModel("torus", f, white, [1, 0.4, 2.5], [rotationStep * -4, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "donut.png");
 
         //Boden
-        createModel("plane", f, white, [0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], greyMaterial, texturePath + "Grass_04.png");
+        createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "Grass_04.png");
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];
@@ -760,7 +785,7 @@ var app = (function () {
         var circle_Umfang = 2 * Math.PI //2 * PI (* r) = Kreisumfang. t kann zwischen 0 und 2 Pi liegen. 
         var dt = circle_Umfang / n; //dt = Schrittweite. 
         var t = 0;
-        var r = 2;
+        var r = 3;
 
         for (var i = 0; i <= n - 1; i++, t += dt) {
             //t = Ein Punkt auf dem Umfang des Kreises. Erstes t Ist 0, letztes T ist 2 * PI.

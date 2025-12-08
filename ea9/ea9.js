@@ -354,7 +354,10 @@ var app = (function () {
         createModel("torus", f, white, [1, 0.4, 2.5], [rotationStep * -4, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
 
         //Boden
-        createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "Grass_04.png");
+        createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "texture.png");
+
+        //Wand
+        createModel("plane", f, white, [0, 0, -3], [4 * rotationStep, 0, 0], [1, 1, 1], dullMaterial, texturePath + "texture.png");
 
         // Select one model that can be manipulated interactively by user.
         interactiveModel = models[0];

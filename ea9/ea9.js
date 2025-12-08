@@ -69,8 +69,11 @@ var app = (function () {
         ambientLight: [.8, .8, .8],
         //Array aus Punktlichtquellen
         light: [
-            { isOn: true, position: circlePositions[7], color: convertRGB(255, 239, 196), circleIndex: 7 },
-            //{ isOn: true, position: circlePositions[7], color: convertRGB(247, 121, 10), circleIndex: 7 },
+
+            { isOn: true, position: circlePositions[23], color: convertRGB(255, 239, 196), circleIndex: 23 },
+            { isOn: true, position: [0, 0, 0], color: convertRGB(247, 121, 10), circleIndex: 0 },
+            { isOn: true, position: circlePositions[0], color: convertRGB(3, 48, 252), circleIndex: 0 },
+
         ]
     };
 
@@ -345,13 +348,16 @@ var app = (function () {
         let rotationStep = Math.PI / 8;
 
         //Main Donut
-        createModel("torus", f, white, [0, 1, 0], [rotationStep * 6, rotationStep * 6, 0], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
+        createModel("torus", f, white, [0.3, 1, 1], [rotationStep * 6, rotationStep * 6, 0], [2.5, 2.5, 2.5], defaultMaterial, texturePath + "donut.png");
 
         //Standing Donut
-        createModel("torus", f, white, [-1, .6, 2.5], [0, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
+        //createModel("torus", f, white, [-1, .6, 2.5], [0, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
 
-        //Laying Donut
-        createModel("torus", f, white, [1, 0.4, 2.5], [rotationStep * -4, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
+        //Laying Donuts
+        //top
+        createModel("torus", f, white, [-.9, 0.8, 0.5], [rotationStep * -4, 0, 0], [2.9, 2.9, 2.9], defaultMaterial, texturePath + "donut.png");
+        //bottom
+        createModel("torus", f, white, [-1, 0.4, 0.5], [rotationStep * -4, 0, rotationStep * 8], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
 
         //Boden
         createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "texture.png");
@@ -828,6 +834,7 @@ var app = (function () {
 
         //geupdater index an das Licht-Object überreichen.
         light.circleIndex = newIndex;
+        console.log(newIndex)
         render()
     }
 

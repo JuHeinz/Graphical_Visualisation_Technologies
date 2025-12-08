@@ -359,6 +359,13 @@ var app = (function () {
         //bottom
         createModel("torus", f, white, [-1, 0.4, 0.5], [rotationStep * -4, 0, rotationStep * 8], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
 
+        //left
+        createModel("torus", f, white, [-2.5, 0.4, 2], [rotationStep * -4, 0, rotationStep * 7], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
+        //right top
+        createModel("torus", f, white, [2.5, 0.8, 2.7], [rotationStep * -4, 0, rotationStep * 5], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
+        //right bottom
+        createModel("torus", f, white, [2.5, 0.4, 2.5], [rotationStep * -4, 0, rotationStep * 8], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
+
         //Boden
         createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "texture.png");
 

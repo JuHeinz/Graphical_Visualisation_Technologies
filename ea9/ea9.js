@@ -345,13 +345,13 @@ var app = (function () {
         let rotationStep = Math.PI / 8;
 
         //Main Donut
-        createModel("torus", f, white, [0, 1, 0], [rotationStep * 6, rotationStep * 6, 0], [3, 3, 3], shinyMaterial, texturePath + "donut.png");
+        createModel("torus", f, white, [0, 1, 0], [rotationStep * 6, rotationStep * 6, 0], [3, 3, 3], defaultMaterial, texturePath + "donut.png");
 
         //Standing Donut
-        createModel("torus", f, white, [-1, .6, 2.5], [0, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "donut.png");
+        createModel("torus", f, white, [-1, .6, 2.5], [0, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
 
         //Laying Donut
-        createModel("torus", f, white, [1, 0.4, 2.5], [rotationStep * -4, 0, 0], [1, 1, 1], shinyMaterial, texturePath + "donut.png");
+        createModel("torus", f, white, [1, 0.4, 2.5], [rotationStep * -4, 0, 0], [1, 1, 1], defaultMaterial, texturePath + "donut.png");
 
         //Boden
         createModel("plane", f, white, [0, 0, 0], [0, 0, 0], [1, 1, 1], dullMaterial, texturePath + "Grass_04.png");
